@@ -1,0 +1,60 @@
+{% extends "./base.html"%}
+{% block title %}Manage User{% endblock %}
+{% block content%}
+<div class="bg-gray-200 py-2 h-full sm:px-4 md:px-24 mheight">
+
+    {% if current_user.is_authenticated %}
+    <p class="text-3xl mb-4">Manage, {{ user.username }}</p>
+    {% endif %}
+    {% if current_user.is_admin %}
+    <form action="/manage-user?id={{ user.id }}" method="post" enctype=multipart/form-data>
+        {% if user.bet_49ja.is_paid_bot %}
+        <p class="text-2xl">Select {{ user.username }} as paid</p>
+        <select class="md:w-1/5 sm:w-4/5 py-4 rounded-lg border-2 border-gray-600 px-12 my-4" name="pay" id="">
+            <option value="True" selected>Yes</option>
+            <option value="">No</option>
+        </select>
+        
+            {% else %}
+                <p class="text-2xl">Select {{ user.username }} as paid</p>
+                <select class="md:w-1/5 sm:w-4/5 py-4 rounded-lg border-2 border-gray-600 px-12 my-4" name="pay" id="has_paid">
+                    <option value="" selected>No</option>
+                    <option value="True">Yes</option>
+                </select>
+            {% endif %}
+            {% if user.is_admin %}
+                    <p class="text-2xl">Select {{ user.username }} as admin</p>
+                    <select  class="md:w-1/5 sm:w-4/5 py-4 rounded-lg border-2 border-gray-600 px-12 my-4" name="admin" id="">
+                        <option value="True" selected>Yes</option>
+                        <option value="">No</option>
+                    </select>
+            {% else %}
+                <p class="text-2xl">Select {{ user.username }} as admin</p>
+                <select class="md:w-1/5 sm:w-4/5 py-4 rounded-lg border-2 border-gray-600 px-12 my-4" name="admin" id="has_paid">
+                    <option value="" selected>No</option>
+                    <option value="True">Yes</option>
+                </select>
+            {% endif %}
+            {% if user.bet_49ja.is_building %}
+                    <p class="text-2xl">Is {{ user.username }} building</p>
+                    <select  class="md:w-1/5 sm:w-4/5 py-4 rounded-lg border-2 border-gray-600 px-12 my-4" name="building" id="">
+                        <option value="True" selected>Yes</option>
+                        <option value="">No</option>
+                    </select>
+            {% else %}
+                <p class="text-2xl">Is {{ user.username }} building</p>
+                <select  class="md:w-1/5 sm:w-4/5 py-4 rounded-lg border-2 border-gray-600 px-12 my-4" name="building" id="">
+                    <option value="True">Yes</option>
+                    <option value="" selected>No</option>
+                </select>
+            {% endif %}
+            {% if user.bet_49ja.is_paid_bot and user.bet_49ja.is_building %}
+                <br>
+                    <input type="file" name="botapp" id="">
+                    {% endif %}
+                <br>
+            <input class="bg-gray-500 hover hover:bg-gray-700 shadow-sm:hover text-white p-1 mt-2 py-4 px-8 rounded-lg" type="submit" value="Submit">
+        </form>
+    {% endif %}
+</div>
+{% endblock %}

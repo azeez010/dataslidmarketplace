@@ -1,0 +1,19 @@
+{% extends "./base.html"%}
+{% block title %}Admin tab{% endblock %}
+{% block content%}
+<div class="bg-gray-200 py-2 h-full sm:px-4 md:px-24 mheight">
+    {% if current_user.is_admin %}
+       <p class="text-2xl">Welcome, Admin {{ current_user.username }}</p> 
+       <br>
+       <a href="{{url_for('admin_settings')}}">Admin Settings and stats</a>
+       <br>
+    {% endif %}
+    <!-- <form method="post"> -->
+    <input class="border-2 placeholder-text-md border-gray-500 rounded-lg md:w-1/3 sm:3/5 mt-2 mb-2 md:py-2 sm:py-1 sm:px-1" type="search" placeholder="Search users" name="user" id="search"><br>
+    <button class="bg-gray-500 hover hover:bg-gray-700 shadow-sm:hover text-white p-1 rounded-lg sm:mt-1 md:mt-2 md:py-2 md:px-8 sm:py-2 sm:px-4 sm:text-sm md:text-lg" id="submit">search</button>
+    <p id="load"></p>
+    <div id="results"></div>
+
+</div>
+     
+{% endblock %}

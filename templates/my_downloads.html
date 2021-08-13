@@ -1,0 +1,93 @@
+{% extends "./base.html"%}
+{% block title %}Home{% endblock %}
+{% block content%}
+<div>
+        <div >
+            <p class="text-yellow-500 md:text-2xl sm:text-xl hero-title text-center">All <span class="border-b-2 text-blue-900 border-yellow-500">Downloaded soft products</span></p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+                {% for download in my_downloads %}
+                    <div product_id="{{download.product.id}}"class="market p-2 cursor-pointer my-3 w-72 mx-auto md:w-64 rounded-lg  text-black dark:text-white sm:mt-2 shadow-md bg-white dark:bg-gray-700 center-grid justify-center content-center eachProject">
+                        {% if download.product.thumbnail %}
+                            <img class="hover:filter blur-md w-full h-24 md:h-48" src="{{download.thumbnail }}" alt="cbt app">
+                        {% else %}
+                            <img class="hover:filter blur-md" src="/static/cart.svg" alt="cbt app">
+                        {% endif %}
+                        <p class="font-bold sm:text-lg md:text-xl p-1 md:p-2">{{download.product.title}}</p>
+                        <p class="md:mt-2 sm:mt-1 p-2">
+                        <p class="text-green-800 "><b>Downloaded</b></p>
+                        </p>    
+                    </div>
+                {% endfor %}
+            </div>
+<script>
+    $(".market").click(function(){
+        let product_id = $(this).attr("product_id")
+        window.location.href = `/product/${product_id}`
+    })
+
+    $(".buy").each(function(index){
+        $(this).click(function(){
+            let bool = $(this).attr("bool")
+            if(!bool){
+                let price, title, type, _id;
+                let get_cart = localStorage.getItem("cart")
+                if(!get_cart) {
+                    get_cart = []
+                }
+                else{
+                    get_cart = JSON.parse(get_cart)
+                }
+                
+                let info = $(this).attr("data")
+                type = $(this).attr("type")
+                
+                if(typeof info === "string"){
+                    info = info.split("?")
+                    title = info[0];
+                    price = info[1];
+                    _id = info[2];
+                    let data = {'id': _id, "type": type, "price": price, "title": title}
+                    get_cart.push(data)
+                    $("#cart_number").text(get_cart.length)
+                    localStorage.setItem("cart", JSON.stringify(get_cart))
+                }
+                
+                console.log(get_cart)
+                $(this).attr("bool", "True")
+                // alert(false)
+                $(this).attr("class", "buy text-yellow-500 bg-white border-2 border-yellow-500 px-2 py-1 rounded-md")
+                // filterButtons()
+                
+            }
+            else{
+                filterButtons()    
+            }
+         })
+    })
+    
+    function filterButtons(){
+        $(".buy").each(function(index){
+            if($(this).attr("bool")){
+                $(this).attr("bool", "")
+                $(this).attr("class", "buy text-white bg-yellow-500 px-2 py-1 rounded-md")
+            
+                let get_cart = localStorage.getItem("cart")
+                if(!get_cart) {
+                    get_cart = []
+                }
+                else{
+                    get_cart = JSON.parse(get_cart)
+                }
+                let btn_id = $(this).attr("btn_id")
+                let type = $(this).attr("type")
+
+                get_cart = get_cart.filter((element) => element.id !== btn_id && element.type !== type )
+                $("#cart_number").text(get_cart.length)
+                localStorage.setItem("cart", JSON.stringify(get_cart))
+    
+            }
+        })    
+    }
+</script>
+{% endblock %}

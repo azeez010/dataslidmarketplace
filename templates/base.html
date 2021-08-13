@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en" class="light" id="html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/1.9.6/tailwind.min.css"> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script> -->
+    <script src="../static/jquery-3.2.1.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="..\static/tailwind.css">
+    <link rel="shortcut icon" href="../static/logo.png" type="image/x-icon">
+    <!-- ./static/tailwind.css -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <meta name='theme-color' content="rgb(243, 176, 176)">
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
+    {% block head %}{% endblock %}
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<style>
+    .hero-title{
+        font-family: 'Luckiest Guy', cursive;
+    }
+    *{
+        margin: 0;
+    }
+    /* p{
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    } */
+    .flexI, .flexnav {
+        display: flex;
+        justify-content: space-between;
+    }
+    .xxl{
+        border-radius: 25px;
+    }
+    /* .grid{
+        display: grid;
+        grid-template-columns: 4fr 8fr;
+    }
+    .ungrid{
+        display: grid;
+        grid-template-columns: 5fr 4fr; } */
+    .mheight{
+        min-height: 80vh;
+    }
+
+    label{
+        font-size: 24px;
+    }
+    .cancelButton{
+        cursor: pointer;
+        margin-top: -10px;
+    }
+    /* input::placeholder, input, textarea{
+        font-size: 24px;
+        padding-left: 8px;
+        background-color: white;
+    } */
+
+    select {
+        font-size: 20px;
+        padding-left: 8px;
+    }
+
+    button{
+        font-size: 18px;
+    }
+
+#loader {
+  border: 6px solid #939493;
+  border-radius: 50%;
+  border-top: 6px solid #3a3939;
+  width: 60px;
+  height: 60px;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+  display: none;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.qa{
+    height: 50px;
+    width: 150px;
+}
+
+@media (max-width: 680px) {
+    input::placeholder, input, textarea{
+        font-size: 15px;
+        padding-left: 4px;
+        background-color: white;
+    }
+
+    label{
+        font-size: 18px;
+    }
+    select {
+        font-size: 14px;
+        padding-left: 2px;
+    }
+
+    button{
+        font-size: 18px;
+    
+    }
+    
+    .qa{
+        height: 45px;
+        width: 140px;
+    }
+    .flexI {
+        display: block;
+    }
+
+}
+
+.z-100{
+    z-index: 100;
+}
+
+.z-50{
+    z-index: 50;
+}
+
+.popup-style{
+ background-color: rgba(0, 0, 0, .9);  
+ position: fixed; 
+}
+</style>
+<body class="bg-gray-100 dark:bg-gray-800">
+    <div class="w-full bg-gray-900 mb-4 flexnav  pt-2 pb-1 md:py-2 shadow  top-0 sticky z-20 px-2 md:px-4">
+        <div classs="flex flex-shrink-0">
+            <div>
+                <a href="/home"><img src="../static/logo.png" class="h-8 w-24 md:h-12 md:w-36 " alt="logo"></a>
+            </div>
+        </div>
+        <div class="inline-block mt-4 hidden md:block">
+            <a href="/carts"><img src="/static/cart.svg" class="mt-1 h-6 w-16 md:h-6 md:w-18 float-right absolute   " alt="logo"></a>
+            <span class="rounded-3xl h-4 w-4 bg-red-500 text-md text-white py-1 px-2 z-20 cart_number">0</span>
+        </div>
+        <div>
+            <div class="block md:hidden">
+                <a href="/carts"><img src="/static/cart.svg" class="mt-1 h-6 w-16 md:h-6 md:w-18 float-right absolute   " alt="logo"></a>
+                <span class="rounded-3xl h-4 w-4 bg-red-500 text-md text-white py-1 px-2 z-20 cart_number">0</span>
+            </div>
+            <form action="/search"method="GET" id="searchBar" class="hidden md:block">
+                <div class="md:mt-2" style="display: flex; justify-content: space-between;">
+                    <input type="text" class="w-32 md:w-96 placeholder-p-1 focus:w-96 rounded-sm p-1 placeholder-gray-400 m-0" name="search" placeholder="Search...">
+                    <button  class="bg-gray-400 p-2"><i style="color: rgb(112, 112, 112);" id="searchForum" class="fa fa-search"></i></button>
+                </div>
+            </form>
+        </div>
+        
+        <div id="container">
+                <div class="flex sm:mt-0 md:mt-3">
+                    <i class="fa fa-search text-2xl text-blue-300 mr-2 md:hidden" id="searchBtn"></i>
+                    <div class="lg:hidden">
+                       <div id="navbar">
+                            <div class="h-1 w-6 bg-blue-300 mt-1" id="topbar"></div>
+                            <div class="h-1 w-6 bg-blue-300 my-1" id="middlebar"></div>
+                            <div class="h-1 w-6 bg-blue-300" id="bottombar"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <!-- <div class="inline-block mt-4 block md:hidden">
+                            <a href="/carts"><img src="/static/cart.svg" class="mt-1 h-6 w-16 md:h-6 md:w-18 float-right absolute   " alt="logo"></a>
+                            <span class="rounded-3xl h-4 w-4 bg-red-500 text-md text-white py-1 px-2 z-20 cart_number">0</span>
+                        </div> -->
+
+                        <ul  class="float-right mx-2 hidden  lg:block">
+                            <div class="inline-block mt-4 block md:hidden">
+                                <a href="/carts"><img src="/static/cart.svg" class="mt-1 h-6 w-16 md:h-6 md:w-18 float-right absolute   " alt="logo"></a>
+                                <span class="rounded-3xl h-4 w-4 bg-red-500 text-md text-white py-1 px-2 z-20 cart_number">0</span>
+                            </div>
+                            {% if current_user.is_authenticated %}
+                                <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('home')}}">Home</a>      
+                                <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('market')}}">Market</a>     
+                                <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('my_downloads')}}">My downloads</a>     
+                                {% if current_user.is_authenticated %}
+                                {% if current_user.is_admin %}
+                                    <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('add_items')}}">Add Items</a>
+                                    <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('admin')}}">Admin tab</a>
+                                    {% endif %}
+                                    <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('logout')}}">logout</a>
+                                    {% endif %}
+                            {% else %}
+                            
+                            <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('home')}}">Home</a>                
+                            <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('market')}}">Market</a>             
+                            {% if current_user.is_authenticated %}
+                            {% if current_user.is_admin %}
+                                        <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('admin')}}">Admin tab</a>
+                                        {% endif %}
+                                    <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('logout')}}">Logout</a>
+                                {% endif %}
+                                <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('signup')}}">Sign up</a>
+                                <a class="md:mx-1 sm:text-blue-300 md:text-white md:bg-yellow-500  p-2 text-white w-fullpx rounded-lg-1 md:px-3 md:py-1 text-lg font-normal rounded-2xl" href="{{url_for('login')}}">Login</a>
+                                {% endif %}
+                            </ul>    
+                    </div>
+                </div>
+            </div>
+            <div id="insertNav" class="hidden absolute mt-12 bg-white rounded-lg w-4/5 shadow p-2 text-center mx-4"></div>
+        </div>
+        <section class="px-2 md:px-8 min-h-screen bg-gray-100">
+            {% with messages=get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                    {% for category, message in messages %}
+                        <p class="rounded-lg bg-white py-4 my-4 border-16 border-gray-200 px-8 text-gray-600 sm:text-md md:text-xl cursor">{{ message }}<span class="text-5xl text-gray-600 hover:text-gray-700 float-right cancelButton" id="cancel">&times;</span></p>
+                    {% endfor %}
+                {% endif %}
+            {% endwith%}
+            {% block content %}{% endblock %}
+        </section>
+        <div class="relative sm:py-2 md:py-4 sm:px-8 md:px-16 sm:block flexI sm:block md:flex bg-gray-900 -z-30 rounded-tl-xl rounded-tr-xl">
+            <div class="ml-2 md:ml-4 py-2 md:py-4">
+                <img src="/static/logo.png" width="120" height="40" alt="">
+                <div class="my-4 p-2 mr-2">
+                    <p class="text-white"> Subscribe to our newsletter</p>
+                    <input id="emailInput" type="email" class="p-2 emailInput border-2 placeholder-gray-500 border-white my-2 w-full" placeholder="Email" required />
+                    <button id="joinBtn" class="bg-yellow-500 joinBtn p-2 text-white w-full rounded-lg">Join now!</button>    
+                </div>
+                <p class="my-2 mb-4 md:mb-6 text-md md:text-xl text-white font-semibold ">HOTLINKS</p>
+                <a href="http://www.africonn.com" target="_blank" class="text-gray-200 text-md md:text-xl my-2 md:my-4">www.africonn.com</a><br>
+                <p class="text-gray-200 text-md md:text-xl my-2 md:my-4">
+                    Dataslid digitals, Mokola, Ibadan
+                </p>
+                <a href="https://www.youtube.com/channel/UC2CnO0lfpt6w7zbHTZE6BzA" target="_blank" class="text-gray-200 text-md md:text-xl my-2 md:my-4">Dataslid Youtube Channel</a>
+            </div>
+            
+        </div>
+    </div>
+</body>
+    <script>
+        let emailPopup = () => {
+        
+        let popupInterval = localStorage.getItem("popup_interval")
+        let popupSubscribed = localStorage.getItem("subscribed")
+        
+        if(!popupSubscribed){
+            if(!popupInterval) popup()
+    
+            popupInterval ?? localStorage.setItem("popup_interval", 7)
+    
+            popupInterval = Number(localStorage.getItem("popup_interval"))
+    
+            popupInterval--
+            
+            localStorage.setItem("popup_interval", popupInterval)
+            
+            if(popupInterval === 0) localStorage.removeItem("popup_interval") 
+            
+            clearInterval(intervalId)
+        }
+    }
+
+    let popup = () => {
+        $("body").prepend(
+            `<div id="popup" class="z-50 flex h-screen w-full absolute bg-gray-200 popup-style items-center justify-center ">
+                <div class="bg-white rounded-xl opacity-100 p-4 m-2 md:m-0">
+                    <span id="closePopup" class="cursor-pointer text-2xl text-red-600 float-right">&times;</span>
+                    <h1 class="mb-2 font-bold text-2xl">Join our Newsletter!</h1>  
+                    <p class="text-lg">To get notified for new software tools and tutorials, Subscribe to our newsletter</p>
+                    <input type="email" id="popupEmailInput" class="p-2 emailInput border-2 border-gray-400 placeholder-gray-600 my-2 w-full" placeholder="Email" required />
+                    <button id="popupJoinBtn" class="bg-yellow-500 joinBtn p-2 text-white w-full rounded-lg">Join now!</button>    
+                </div>
+            </div>
+            `
+        )
+        let closePopupBtn = document.getElementById("closePopup")
+        closePopupBtn.addEventListener("click", closePopup)
+        
+        $("#popupJoinBtn").click(function(){
+            emailListFunc("#popupEmailInput")
+        })
+
+        popupCloser()
+    }
+
+    let successPopup = () => {
+        $("body").prepend(
+            `<div id="popup" class="z-100 flex h-screen w-full absolute bg-gray-200 popup-style items-center justify-center ">
+                <div class="bg-white rounded-xl opacity-100 p-4">
+                    <span id="closePopup" class="cursor-pointer text-2xl text-red-600 float-right">&times;</span>
+                    <i class="fa fa-check text-center text-green-500 text-2xl"></i>
+                    <p>Thanks for joining our newsletter</p>
+                </div>
+            </div>
+            `
+        )
+        let closePopupBtn = document.getElementById("closePopup")
+        closePopupBtn.addEventListener("click", closePopup)
+        popupCloser()
+    }
+
+    let errorPopup = (error) => {
+        $("body").prepend(
+            `<div id="popup" class="z-100 flex h-screen w-full absolute bg-gray-200 popup-style items-center justify-center ">
+                <div class="bg-white rounded-xl opacity-100 p-4">
+                    <span id="closePopup" class="cursor-pointer text-2xl text-red-600 float-right">&times;</span>
+                    <i class="fa fa-times text-center text-red-500 text-2xl border-2 border-red-500 rounded-full px-3"></i>
+                    <p class="text-xl">${error}</p>
+                </div>
+            </div>
+            `
+        )
+        let closePopupBtn = document.getElementById("closePopup")
+        closePopupBtn.addEventListener("click", closePopup)
+        popupCloser()
+    }
+
+    let cartPopup = (message) => {
+        $("section").prepend(
+            // <div id="popup" class="z-100 flex h-screen w-full absolute bg-gray-200 popup-style items-center justify-center ">
+            ` <div id="cartPopup" class="bg-green-500 rounded-xl p-2 float-right mr-2 border-2">
+                    <div class="flex">
+                        <p class="text-md text-white">${message}</p>
+                        <span id="closeCartPopup" class="cursor-pointer text-2xl text-red-600 -mt-1 ml-4 ">&times;</span>
+                    </div>
+                </div>
+                `
+        )
+
+
+        let closeCartPopup = () => {
+            $("#cartPopup").remove()
+        }
+
+        let closePopupBtn = document.getElementById("closeCartPopup")
+        closePopupBtn.addEventListener("click", closeCartPopup)
+        let int = 2
+        let intervalId = setInterval(() => {
+            $("#cartPopup").addClass(`opacity-${int * 10 }`)
+            if(int == 0){
+                clearInterval(intervalId)
+                $("#cartPopup").remove()
+            } 
+            $("#cartPopup").removeClass(`opacity-${int * 10 }`)
+            int--
+        }, 1000);
+    
+    
+    }
+
+
+
+
+    let time = 1000 //In millisec
+    let intervalId = setTimeout(emailPopup, time)   
+
+
+    // alert("Hi")
+    let closePopup = () => {
+        $("#popup").remove()
+    }
+    
+
+    $("#joinBtn").click(function(){
+        emailListFunc("#emailInput")
+    })
+    
+
+    let emailListFunc = async (emailId) => {
+        let email = $(emailId).val()
+        let emailTest = validateEmail(email)
+        if(!emailTest){
+            errorPopup("Email is empty or not valid")
+            return
+        }
+
+        const join_list = await fetch('/subscribe-to-mail', {
+            method: 'POST',
+            headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({email})
+        });
+        const listResponse = await join_list.json();
+        console.log(listResponse)
+       
+        $("#emailInput").val("")
+        
+        if(listResponse.ok){
+            successPopup()
+            localStorage.setItem("subscribed", true)
+        }
+            
+    }  
+
+    function validateEmail(email) {
+        if(!email) return false
+        const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    }
+
+    function popupCloser(){
+        let popupDiv = document.getElementById("popup")
+        window.onclick = function(event) {
+            if (event.target == popupDiv) {
+                popupDiv.style.display = "none";
+            }
+        }
+    }
+
+    $("#searchBtn").click(function(){
+        $("#searchBar").toggle()
+    })
+</script>
+<script>
+
+    $("#insertNav").html($("ul").html())
+    let f = false
+    $("#navbar").click(function(){
+        if(!f){
+            f = true
+            $("#insertNav").show()
+            $("#insertNav").addClass("inline-block")
+            
+        }
+        else{
+            $("#insertNav").hide()
+            f = false
+        }
+    })
+
+    $("#cancel").click(function(){
+        $(this).parent().hide()
+    })
+    
+function updateCartNumber(){
+    let cart_number = JSON.parse(localStorage.getItem("cart"))
+    $(".cart_number").each(function(i, elem){
+        elem.innerText = cart_number.length
+    })
+}
+
+    function marketPriceOff(){
+        let priceOff = $('.price-off')
+        if(priceOff){
+            priceOff.each(function(i, elem){
+                if(elem){
+                   let priceCut = elem.innerText
+                   priceCut = parseInt(priceCut).toFixed(0)
+                   elem.innerText = priceCut
+               } 
+           });
+        }
+    }
+
+    marketPriceOff()
+    updateCartNumber()
+
+    
+</script>
+</html>

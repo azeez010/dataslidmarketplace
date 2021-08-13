@@ -1,0 +1,133 @@
+{% extends "./base.html"%}
+{% block title %}Add items{% endblock %}
+{% block content%}
+
+<div class="bg-gray-200 py-2 h-full px-2 md:px-24 mheight">
+       <p class="text-2xl">Welcome {{ current_user.username }}</p> 
+    <form method="post" enctype="multipart/form-data">
+        <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " type="search" value="{% if product.title %}{{ product.title }}{% endif %}" placeholder="Product's title" name="title" id="search"><br>
+        <textarea id="mail_messages" placeholder="Product's description"
+         class="rounded-lg bg-white w-full md:w-1/3 border-2 py-1 px-1 md:border-gray-500 md:h-32 sm:h-16 md:py-2 sm:py-2 "  id="" name="description" cols="30" rows="5">{% if product.description %}{{ product.description }}{% endif %}</textarea><br>
+        
+        <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " name="old_price" type="text" value="{% if product.old_price %}{{ product.old_price }}{% endif %}" placeholder="Old price" id="subject"><br>
+        <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " name="new_price" type="text" placeholder="New price" value="{% if product.price %}{{ product.price }}{% endif %}" id=""><br>
+        <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " name="youtube_link" type="text" placeholder="youtube link" value="{% if product.youtube_link %}{{ product.youtube_link }}{% endif %}" id=""><br>
+        
+        <div>
+            <p>Upload the soft product's demo (optional)</p>
+            <input type="file" name="demo_product" id="" value="{% if product.demo_link %}{{ product.demo_link }}{% endif %}" >
+        </div>
+        <div>
+            <p>Upload the soft product</p>
+            <input type="file" name="product" id="" value="{% if product.product_link %}{{ product.product_link }}{% endif %}">
+        </div>
+        <br>
+        <div id="photo_div">
+            <p>Upload the product image(s)</p>
+            <input type="file" name="picture1" id="" value="{% if product.thumbnail_link %}{{ product.thumbnail_link }}{% endif %}">
+        </div>
+        <br>
+        <button id="send_btn" class="bg-gray-500 hover hover:bg-gray-700 shadow-sm:hover text-white p-1 rounded-lg sm:mt-1 md:mt-2 md:py-2 md:px-8 sm:py-2 sm:px-4 sm:text-sm md:text-lg">Add product</button>
+    </form>
+
+    <button id="add_picture">+ Add Pictures</button>
+    <button id="clear_picture">+ Clear Pictures</button>
+</div>
+      <script>
+          let currentPictures = 1
+          $("#add_picture").click(function(){
+                currentPictures++
+                $("#photo_div").append(`<input type='file' name='picture${currentPictures}'>`)
+          })
+          $("#clear_picture").click(function(){
+                currentPictures = 1;
+                $("#photo_div").empty()
+                $("#photo_div").append(`<input type='file' name='picture${currentPictures}'>`)
+          })
+
+        let mailFunc = async () =>{
+            let mail_message = document.getElementById("mail_messages").value
+            let subject = document.getElementById("subject").value
+            let user = document.getElementById("user").value
+            let mail_info = document.getElementById("mail_info")
+            
+            mail_info.innerText = "Loading..."
+            mail_info.setAttribute("class", "text-xl text-gray-600 py-3 block")
+            if(mail_message && user && subject){
+                const send_mail = await fetch('/mail-users', {
+                    method: 'POST',
+                    headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({user, subject, mail: mail_message})
+                });
+                const mail_res = await send_mail.json();
+                mail_info.innerText = ""
+                // console.log(mail_res);
+                if(mail_res.ok){
+                    mail_info.innerText = "You have successfully sent the mail(s)"
+                    mail_info.setAttribute("class", "text-xl text-green-600 py-3 block")
+                }   
+                else{
+                    mail_info.innerText = "Ooops! Mail failed"   
+                    mail_info.setAttribute("class", "text-xl text-red-600 block py-3") 
+                }
+            }
+            else{
+                mail_info.innerText = "Do not leave any field empty"
+                mail_info.setAttribute("class", "text-xl text-red-600 py-3 block")
+            }
+        }
+
+        document.querySelector("#send_btn").addEventListener("click", mailFunc)
+        
+        let loading = document.getElementById("load")
+        let submit = document.getElementById("submit")
+        let results = document.getElementById("results")
+        submit.addEventListener("click", async () =>{
+            let search = document.getElementById("search").value
+            if(search){
+                if((/\s/).test(search)) return alert(`The user's username must not contain space`)
+                loading.innerText = "Loading..."
+                let res = await fetch(`/search-admin?q=${search}`)
+                
+                // submit.setAttribute("disabled", "true")
+                console.log(res)
+                if(res.ok) {
+                    let data = await res.json()
+                    loading.innerText = ""
+                    console.log(data.users)
+                    // for()
+                    while(results.firstChild){
+                        results.removeChild(results.lastChild)
+                    }
+                    if(data.users.length < 1){
+                        loading.innerText = "No user matched"
+                        loading.setAttribute("class", "text-xl py-2 text-red-600")    
+                    }
+                    for(i of data.users){
+                        each_element = document.createElement("div")
+                        each_name = document.createElement("p")
+                        each_email = document.createElement("p")
+                        each_is_paid = document.createElement("p")
+                        each_button = document.createElement("a")
+                        each_name.innerText = i.username
+                        each_name.setAttribute('class', "text-2xl")
+                        each_element.setAttribute('class', "py-2 rounded-lg bg-white my-4 p-4")
+                        each_button.setAttribute('href', `/manage-user?id=${i.id}`)
+                        each_button.setAttribute("class", "text-xl py-2")
+                        each_button.innerText = "manage"
+                        each_element.append(each_name)
+                        each_element.append(each_button)
+                        results.append(each_element)
+                    }
+                }
+                // submit.setAttribute("disabled", "false")
+            }
+            else{
+                alert("You must enter the user's username")
+            }
+        })
+    </script>
+{% endblock %}

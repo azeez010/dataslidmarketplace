@@ -1,0 +1,24 @@
+{% extends "./base.html"%}
+{% block title %}Share your Testimony{% endblock %}
+{% block content %}
+<div class="bg-gray-200 h-full md:px-24 sm:px-4 pt-8 mheight">
+    {% for testimony in testimonies %}
+        <div class="rounded-lg bg-white py-4 my-4 px-8">
+            <p class="sm:text-md md:text-xl">{{ testimony.user.username }}</p>
+            <p class="sm:text-md md:text-lg py-2 text-gray-700">{{ testimony.testimony }}</p>
+            <p class="sm:text-md md:text-lg text-gray-600">{{ testimony.datetime|humanize()}}</p>
+        </div>
+    {% endfor %}
+    <div class="py-2">
+        {% if current_user.is_authenticated %}
+            <form class="w-full" action="/testimony" method="post">
+                {{ form.csrf_token }}
+                {{ form.testimony(placeholder="Share your testimony", class="rounded-lg bg-white w-full border-2 border-gray-500 h-32 py-2 px-8")}}
+                {{ form.submit(class="bg-gray-500 text-white py-4 px-8 mt-2e rounded-lg") }}
+            </form>
+        {% else%}
+            <a href="/login">Login to post testimony</a>
+        {% endif %}
+    </div>
+</div>
+    {% endblock %}

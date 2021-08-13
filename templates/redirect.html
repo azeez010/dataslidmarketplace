@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="..\static/tailwind.css">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>thanks for buying...</title>
+</head>
+<body class="flex w-full bg-gray-200 h-screen">
+    <div class="  m-auto mt-12">
+        <div class="inline-block text-center bg-white shadow rounded-lg py-1 px-2">
+            <p class="text-lg">Thanks for patronise us</p>
+            <p class="text-lg"><i>Redirecting in <span id="redirect"></span></i></p>
+        </div>
+    </div>
+</body>
+<script>
+    let MilliSec = 1000;
+    let redirectSec = 5
+    let url = '/my-downloads'
+    function redirectionComponent(MilliSec, redirectSec, url){
+        let redirect = document.getElementById("redirect")
+        redirect.innerText = redirectSec
+    
+        let redirectCounter = setInterval(()=>{
+            if(redirectSec <= 1) {
+                clearInterval(redirectCounter)
+                localStorage.clear()
+                window.location.href = url     
+            }
+            redirect.innerText = redirectSec
+            redirectSec--
+        }
+            , MilliSec
+        )
+    }
+
+    redirectionComponent(MilliSec, redirectSec, url)
+
+</script>
+</html>

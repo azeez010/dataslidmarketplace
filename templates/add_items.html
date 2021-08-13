@@ -1,0 +1,116 @@
+{% extends "./base.html"%}
+{% block title %}Add items{% endblock %}
+{% block content%}
+
+<div class="bg-gray-200 py-2 h-full px-2 md:px-24 mheight">
+       <p class="text-2xl">Welcome {{ current_user.username }}</p> 
+    <form id="postForm" method="post" enctype="multipart/form-data">
+        <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " type="search" placeholder="Product's title" name="title" id="search"><br>
+        <textarea id="mail_messages" placeholder="Product's description", class="rounded-lg bg-white w-full md:w-1/3 border-2 py-1 px-1 md:border-gray-500 md:h-32 sm:h-16 md:py-2 sm:py-2 " id="" name="description" cols="30" rows="5"></textarea><br>
+        
+        <input value="0" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " name="old_price" type="text" placeholder="Old price" id="subject"><br>
+        <input value="0" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " name="new_price" type="text" placeholder="New price" id=""><br>
+        
+        
+        <div id="photo_div">
+            <p>Upload the product image(s)</p>
+            <input type="file" name="picture1" id="">
+        </div>
+
+        <select name="product_type" id="product_type" class="border-2 border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2" id="" required>
+            <option value="">Select the product type</option>
+            <option value="course">course</option>
+            <option value="Software">Software</option>
+        </select>
+        
+        <div id="course_container" class="hidden">
+            <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " name="course_link" type="text" placeholder="course link" id=""><br>
+            <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " name="course_preview_link" type="text" placeholder="course  preview link" id=""><br>
+        </div>
+        
+        
+        <div id="software_container" class="hidden">
+            <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " name="youtube_link" type="text" placeholder="youtube link" id=""><br>
+            <div>
+                <p>Upload the soft product's demo (optional)</p>
+                <input type="file" name="demo_product" id="">
+            </div>
+            <div>
+                <p>Upload the soft product</p>
+                <input type="file" name="product" id="">
+            </div>
+            <br>
+        </div>
+        <br>
+        <button id="send_btn" class="bg-gray-500 hover hover:bg-gray-700 shadow-sm:hover text-white p-1 rounded-lg sm:mt-1 md:mt-2 md:py-2 md:px-8 sm:py-2 sm:px-4 sm:text-sm md:text-lg">Add product</button>
+    </form>
+
+    <button id="add_picture">+ Add Pictures</button>
+    <button id="clear_picture">+ Clear Pictures</button>
+</div>
+      <script>
+          let currentPictures = 1
+          $("#add_picture").click(function(){
+                currentPictures++
+                $("#photo_div").append(`<input type='file' name='picture${currentPictures}'>`)
+          })
+          $("#clear_picture").click(function(){
+                currentPictures = 1;
+                $("#photo_div").empty()
+                $("#photo_div").append(`<input type='file' name='picture${currentPictures}'>`)
+          })
+
+        let mailFunc = async () =>{
+            let mail_message = document.getElementById("mail_messages").value
+            let subject = document.getElementById("subject").value
+            let user = document.getElementById("user").value
+            let mail_info = document.getElementById("mail_info")
+            
+            mail_info.innerText = "Loading..."
+            mail_info.setAttribute("class", "text-xl text-gray-600 py-3 block")
+            if(mail_message && user && subject){
+                const send_mail = await fetch('/mail-users', {
+                    method: 'POST',
+                    headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({user, subject, mail: mail_message})
+                });
+                const mail_res = await send_mail.json();
+                mail_info.innerText = ""
+                // console.log(mail_res);
+                if(mail_res.ok){
+                    mail_info.innerText = "You have successfully sent the mail(s)"
+                    mail_info.setAttribute("class", "text-xl text-green-600 py-3 block")
+                }   
+                else{
+                    mail_info.innerText = "Ooops! Mail failed"   
+                    mail_info.setAttribute("class", "text-xl text-red-600 block py-3") 
+                }
+            }
+            else{
+                mail_info.innerText = "Do not leave any field empty"
+                mail_info.setAttribute("class", "text-xl text-red-600 py-3 block")
+            }
+        }
+
+        document.querySelector("#send_btn").addEventListener("click", mailFunc)
+        
+    
+        $("#product_type").change(function(){
+            let type = $(this).val() 
+            if(type == "course"){
+                $("#course_container").show()
+                $("#software_container").hide()
+            }
+            else{
+                $("#course_container").hide()
+                $("#software_container").show()
+
+            }
+        })
+
+
+    </script>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "./base.html"%}
+{% block title %}New requests{% endblock %}
+{% block content %}
+<div class="md:bg-gray-200 sm:bg-gray-400 py-4 h-full sm:px-2 md:px-24 mheight">
+    <div id="container">
+        {% for new_request in new_requests %}
+        <div  class="py-2 rounded-lg bg-white my-4 p-4">
+            <p class="text-2xl">{{ new_request.user.username }}</p>
+            <p class="text-xl py-2 text-gray-600">{{new_request.request}}</p>
+            <p class="text-xl text-gray-600">{{ new_request.datetime|humanize() }}</p>
+            <!-- {{ new_request.not_seen }} -->
+        </div>      
+        {% endfor %}
+    </div>
+    <button class="bg-gray-500 text-xl text-white py-2 px-4 rounded-lg mt-2" id="more_request">More</button>
+
+</div>
+
+<script>
+    let more_request = document.getElementById("more_request")
+    let max_paginate = Number("{{ max_pagination_no }}")
+    let container = document.getElementById("container")
+    var page_no = 1
+    more_request.addEventListener("click", async () =>{
+        page_no++
+        let res = await fetch(`/new-requests?page=${page_no}`)
+        let data = await res.json()
+        let request_data = JSON.parse(data.requests)
+        // console.log()
+        console.log(request_data)
+        request_data.forEach((elem)=>{
+            let div = document.createElement('div')
+            let username_p = document.createElement('p')
+            let datetime_p = document.createElement('p')
+            let requests_p = document.createElement('p')
+            div.setAttribute('class', 'py-2 rounded-lg bg-white my-4 p-4')
+            username_p.setAttribute('class', 'text-2xl')
+            username_p.innerText = elem['user.username']
+            datetime_p.setAttribute('class', 'text-xl py-2 text-gray-600')
+            datetime_p.innerText = elem['datetime']
+            requests_p.setAttribute('class', 'text-xl text-gray-600')
+            requests_p.innerText = elem['request']
+            
+            div.append(username_p)
+            div.append(requests_p)
+            div.append(datetime_p)
+            container.appendChild(div)
+        })
+        if(page_no >= max_paginate){
+            more_request.style.display = "none"
+            console.log(max_paginate)
+        }
+    })    
+    
+    let mark_seen = async () =>{
+        let res = await fetch(`/seen-requests`)
+        if(res.ok) console.log("Gone")
+    }
+    mark_seen()
+</script>
+{% endblock %}

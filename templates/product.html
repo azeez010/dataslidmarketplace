@@ -1,0 +1,261 @@
+{% extends "./base.html"%}
+{% block title %}Product{% endblock %}
+{% block content%}
+<div>
+    <div class ="bg-white shadow rounded-lg p-1 p-4">
+        <p><b>{{ product.title}}</b></p>
+        <div class="flex">
+            {% for i in product.product_image %}
+                <img src="{{i.image_url}}" class="w-full h-48 md:w-2/5" alt="">
+            {% endfor %}
+            <br>
+        </div>
+        
+        <p><i><b>description</b></i></p>
+        <p>{{ product.description}}</p>
+        <br>
+
+        {% if product.product_type == "course" %}
+            {% if product.course_preview_link %}
+                <div class="my-2">
+                    <iframe src="{{ product.course_preview_link }}" frameborder="0" class="w-full md:w-3/5 h-48 md:h-64 m-auto"></iframe>
+                </div>
+            {% endif %}
+            <button type="pay" bool="" btn_id="{{ product.id}}" data="{{ product.title}}?{{ product.price}}?{{ product.id}}?{{ product.thumbnail}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md" id="buy" >Get Course!</button>
+        {% else%}
+            {% if user_purchased.user_id == current_user.id and user_purchased.product_id == product.id %}
+            <a href="{{product.download_link}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md hover:bg-white hover:text-yellow-500 border-2 border-yellow-500">Download</a>
+            {% else %}
+                {% if product.price %}
+                    <p> ₦{{ product.price }} - <span class="text-red-600 line-through">₦{{product.old_price}}</span> <span id="price-off">{{100 - ((product.price / product.old_price) * 100)}}</span>% off! </p>
+                {% else %}
+                    <span class="rounded-lg shadow px-2 py-1 bg-green-500 text-green-100">Free</span>
+                {% endif %}
+
+                {% if not product.price %}
+                    {% if product.demo_link %}
+                        <a href="{{product.demo_link}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md"> Free download</a>
+                        <button type="free" bool=""  btn_id="{{ product.id}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md" >Free</button>
+                    {% endif %}
+                {% else %}
+                    <button type="pay" bool="" btn_id="{{ product.id}}" data="{{ product.title}}?{{ product.price}}?{{ product.id}}?{{ product.thumbnail}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md" id="buy" >buy</button>
+                    {% if product.demo_link %}
+                        <a href="{{product.demo_link}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md">Demo</a>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+
+            {% if product.youtube_link %}
+                <div class="my-2">
+                    <iframe src="{{product.youtube_link}}" frameborder="0" class="w-full md:w-3/5 h-48 md:h-64 m-auto"></iframe>
+                </div>
+            {% endif %}
+            {% if current_user.is_authenticated %}
+                {% if current_user.id == product.store.user.id %}    
+                    <a href="../edit-item/{{ product.id }}">Edit product</a>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+
+        <!-- <div class="relative">
+            <div class="absolute inset-0 w-screen h-screen bg-pink-500 text-white flex items-center justify-center text-5xl transition-all ease-in-out duration-1000 transform translate-x-0 slide">Hello</div>
+            <div class="absolute inset-0 w-screen h-screen bg-purple-500 text-white flex items-center justify-center text-5xl transition-all ease-in-out duration-1000 transform translate-x-full slide">There</div>
+            <div class="absolute inset-0 w-screen h-screen bg-teal-500 text-white flex items-center justify-center text-5xl transition-all ease-in-out duration-1000 transform translate-x-full slide">Booya!</div>
+            <div onclick="previousSlide()" class="fixed bottom-0 right-0 bg-white w-16 h-16 flex items-center justify-center text-black">&#x276F;</div>
+            <div onclick="nextSlide()" class="fixed bottom-0 right-0 bg-white w-16 h-16 mr-16 border-r border-gray-400 flex items-center justify-center text-black">&#x276E;</div>
+        </div> -->
+
+    </div>
+        <div >
+            {% if products %}
+                <p class="text-yellow-500 md:text-2xl sm:text-xl hero-title text-center">related <span class="border-b-2 text-blue-900 border-yellow-500">Products</span></p>
+            {% endif %}    
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
+            {% for _product in products %}
+                <div product_id="{{_product.id}}"class="market p-2 cursor-pointer my-3 m-2 rounded-lg  text-black dark:text-white sm:mt-2 shadow-md bg-white dark:bg-gray-700 center-grid justify-center content-center eachProject">
+                    {% if _product.thumbnail %}
+                    <img class="hover:filter blur-md w-full md:h-48" src="{{_product.thumbnail }}" alt="cbt app">
+                    {% else %}
+                    <img class="hover:filter blur-md" src="/static/cart.svg" alt="cbt app">
+                    {% endif %}
+                    <p class="font-bold sm:text-lg md:text-xl p-1 md:p-2">{{_product.title}}</p>
+                    <p class="md:mt-2 sm:mt-1 p-2">
+                    {% if _product.price %}
+                        <p> ₦{{ _product.price }} - <span class="text-red-600 line-through">₦{{_product.old_price}}</span> <span class="rounded-lg shadow px-2 py-1 bg-red-500 text-red-100"><span class="price-off ">{{100 - ((_product.price / _product.old_price) * 100)}}</span>% off! </span></p>
+                    {% else %}
+                        <span class="rounded-lg shadow px-2 py-1 bg-green-500 text-green-100">Free</span>
+                    {% endif %}
+                        <!-- <span>{{_product.price}} </span>   -->
+                    </p>    
+                </div>
+            {% endfor %}
+        </div>
+<!-- 
+            <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+                <ol class="carousel-indicators">
+                  <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+                  <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+                  <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+                </ol>
+                <div class="carousel-inner">
+                  <div class="carousel-item active">
+                    <img class="d-block w-100" src="..." alt="First slide">
+                  </div>
+                  <div class="carousel-item">
+                    <img class="d-block w-100" src="..." alt="Second slide">
+                  </div>
+                  <div class="carousel-item">
+                    <img class="d-block w-100" src="..." alt="Third slide">
+                  </div>
+                </div>
+                <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+                  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                  <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+                  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                  <span class="sr-only">Next</span>
+                </a>
+              </div> -->
+<script>
+    let priceCut = $('#price-off').text()
+    priceCut = parseInt(priceCut).toFixed(0)
+    $('#price-off').text(priceCut)
+    
+    $(".market").click(function(){
+        let product_id = $(this).attr("product_id")
+        window.location.href = `/product/${product_id}`
+    })
+
+    $("#buy").click(function(){
+        let bool = $(this).attr("bool")
+        if(!bool){
+            console.log("buy")
+            let price, title, type, _id;
+            let get_cart = localStorage.getItem("cart")
+            if(!get_cart) {
+                get_cart = []
+            }
+            else{
+                get_cart = JSON.parse(get_cart)
+            }
+            
+            let info = $(this).attr("data")
+            type = $(this).attr("type")
+            
+            if(typeof info === "string"){
+                info = info.split("?")
+                title = info[0];
+                price = info[1];
+                _id = info[2];
+                thumbnail = info[3];
+                let data = {'id': _id, "type": type, "price": price, "title": title, "thumbnail": thumbnail}
+                get_cart.push(data)
+
+                cartPopup(`{{ product.title }} Cart added`)
+                // $("#cart_number").text(get_cart.length)
+                localStorage.setItem("cart", JSON.stringify(get_cart))
+                updateCartNumber()
+            }
+            
+            console.log(get_cart)
+            $(this).attr("bool", "True")
+            // alert(false)
+            $(this).attr("class", "buy text-yellow-500 bg-white border-2 border-yellow-500 px-2 py-1 rounded-md")
+            // filterButtons()
+            
+        }
+        else{
+            $(this).attr("bool", "")
+                $(this).attr("class", "buy text-white bg-yellow-500 px-2 py-1 rounded-md")
+            
+                let get_cart = localStorage.getItem("cart")
+                if(!get_cart) {
+                    get_cart = []
+                }
+                else{
+                    get_cart = JSON.parse(get_cart)
+                }
+                let btn_id = $(this).attr("btn_id")
+                let type = $(this).attr("type")
+
+                get_cart = get_cart.filter((element) => element.id !== btn_id && element.type !== type )
+                localStorage.setItem("cart", JSON.stringify(get_cart))
+                updateCartNumber()
+        
+        }
+        
+        // else{
+        //     filterButtons()    
+        // }
+    })
+    
+
+    // $(".buy").each(function(index){
+    //     $(this).click(function(){
+    //         let bool = $(this).attr("bool")
+    //         if(!bool){
+    //             let price, title, type, _id;
+    //             let get_cart = localStorage.getItem("cart")
+    //             if(!get_cart) {
+    //                 get_cart = []
+    //             }
+    //             else{
+    //                 get_cart = JSON.parse(get_cart)
+    //             }
+                
+    //             let info = $(this).attr("data")
+    //             type = $(this).attr("type")
+                
+    //             if(typeof info === "string"){
+    //                 info = info.split("?")
+    //                 title = info[0];
+    //                 price = info[1];
+    //                 _id = info[2];
+    //                 thumbnail = info[3];
+    //                 let data = {'id': _id, "type": type, "price": price, "title": title, "thumbnail": thumbnail}
+    //                 get_cart.push(data)
+    //                 $("#cart_number").text(get_cart.length)
+    //                 localStorage.setItem("cart", JSON.stringify(get_cart))
+    //             }
+                
+    //             console.log(get_cart)
+    //             $(this).attr("bool", "True")
+    //             // alert(false)
+    //             $(this).attr("class", "buy text-yellow-500 bg-white border-2 border-yellow-500 px-2 py-1 rounded-md")
+    //             // filterButtons()
+                
+    //         }
+    //         else{
+    //             filterButtons()    
+    //         }
+    //      })
+    // })
+    
+    // function filterButtons(){
+    //     $(".buy").each(function(index){
+    //         if($(this).attr("bool")){
+    //             $(this).attr("bool", "")
+    //             $(this).attr("class", "buy text-white bg-yellow-500 px-2 py-1 rounded-md")
+            
+    //             let get_cart = localStorage.getItem("cart")
+    //             if(!get_cart) {
+    //                 get_cart = []
+    //             }
+    //             else{
+    //                 get_cart = JSON.parse(get_cart)
+    //             }
+    //             let btn_id = $(this).attr("btn_id")
+    //             let type = $(this).attr("type")
+
+    //             get_cart = get_cart.filter((element) => element.id !== btn_id && element.type !== type )
+    //             $("#cart_number").text(get_cart.length)
+    //             localStorage.setItem("cart", JSON.stringify(get_cart))
+    
+    //         }
+    //     })    
+    // }
+
+</script>
+{% endblock %}
