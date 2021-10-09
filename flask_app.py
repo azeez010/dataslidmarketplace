@@ -1,18 +1,20 @@
 from flask import Flask, request, send_file, jsonify, send_from_directory, render_template, flash, redirect, url_for
 from passlib.hash import md5_crypt
 from forms import MyForm, LoginForm, TestimonyForm 
-from models import ProductImage, Products, Store, UserProducts, User, EmailSubcribers, Testimonial, app, db, LoginManager, login_required, login_user, logout_user, current_user, Transaction_Table, current_user
+from models import Products, Store, UserProducts, User, EmailSubcribers, Testimonial, app, db, LoginManager, login_required, login_user, logout_user, current_user, Transaction_Table, current_user
 from is_safe_url import is_safe_url
 from schema import user_schema
 from flask_humanize import Humanize
 from datetime import datetime
-from pypaystack import Transaction, Customer, Plan
+from pypaystack import Transaction
 from mailing_server import mail_folks
 import boto3, botocore, time, hashlib, hmac, json, os, shutil, request_func, mailing_server, basic_auth, string, random
 import json, re
+
 # from werkz/eug import secure_filename
+from utils import upload_image
 from helper import generate_recommendation
-# plesa login
+
 humanize = Humanize(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
@@ -160,200 +162,74 @@ def add_items():
         store_id = current_user.store[0].id
         product = Products(title=title, store_id=store_id, product_type=product_type, course_link=course_link, course_preview_link=course_preview_link, description=description, youtube_link=youtube_link, price=price, old_price=old_price)
         db.session.add(product)
-        db.session.commit()
         
-        product_id = product.id
         
-        first = 0
         for i in request.files:
             file_exists = request.files.get(i)
 
             if file_exists:
-                filename = file_exists.filename
-                storage_key = os.environ.get("aws_key")
-                storage_secret = os.environ.get("aws_secret")
-                storage_bucket = "dataslid"
-                urlExpiryTime = 604799
-                download_expiry_time = time.time() + urlExpiryTime
-                # Set Expiry time
-                product.s3_expiry_time = download_expiry_time
-
-                conn = boto3.client(
-                    's3',
-                    aws_access_key_id=storage_key,
-                    aws_secret_access_key=storage_secret
-                    )
-
                 if i == "product":
-                    Key = f'product/{filename}'
-                    conn.upload_fileobj(file_exists, storage_bucket, Key)
-
-
-                    download_url = conn.generate_presigned_url(ClientMethod='get_object', Params={
-                        'Bucket': storage_bucket,
-                        'Key': Key
-                    }, ExpiresIn=urlExpiryTime)
-
-                    product.download_link = download_url
-                    product.download_key = Key
-                
+                    upload_image(product, file_exists, "download")
                 elif i == "demo_product":
-                    Key = f'demo/{filename}'
-                    conn.upload_fileobj(file_exists, storage_bucket, Key)
-
-
-                    download_url = conn.generate_presigned_url(ClientMethod='get_object', Params={
-                        'Bucket': storage_bucket,
-                        'Key': Key
-                    }, ExpiresIn=urlExpiryTime)
-
-                    product.demo_link = download_url
-                    product.demo_key = Key
-
+                    upload_image(product, file_exists, "demo")
                 else:
-                    Key = f'images/{filename}'
-                    conn.upload_fileobj(file_exists, storage_bucket, Key)
-                    image_url = conn.generate_presigned_url(ClientMethod='get_object', Params={
-                        'Bucket': storage_bucket,
-                        'Key': Key
-                    }, ExpiresIn=urlExpiryTime)
+                    upload_image(product, file_exists, "image")
+    
+        db.session.commit()
+                    # product_id = product.id
+                    # first = 0
+                    # filename = file_exists.filename
+                    # storage_key = os.environ.get("aws_key")
+                    # storage_secret = os.environ.get("aws_secret")
+                    # storage_bucket = "dataslid"
+                    # urlExpiryTime = 604799
+                    # download_expiry_time = time.time() + urlExpiryTime
+                    # # Set Expiry time
+                    # product.s3_expiry_time = download_expiry_time
+
+                    # conn = boto3.client(
+                    #     's3',
+                    #     aws_access_key_id=storage_key,
+                    #     aws_secret_access_key=storage_secret
+                    #     )
+
+                    # Key = f'images/{filename}'
+                    # conn.upload_fileobj(file_exists, storage_bucket, Key)
+                    # image_url = conn.generate_presigned_url(ClientMethod='get_object', Params={
+                    #     'Bucket': storage_bucket,
+                    #     'Key': Key
+                    # }, ExpiresIn=urlExpiryTime)
 
                     
-                    product_image = ProductImage(image_url=image_url, product_id=product_id)
-                    db.session.add(product_image)
+                    # product_image = ProductImage(image_url=image_url, product_id=product_id)
+                    # db.session.add(product_image)
                     
-                    if first == 0:
-                        print("GHELL")
-                        product.thumbnail = image_url
-                        product.thumbnail_key = Key
+                    # if first == 0:
+                    #     product.thumbnail = image_url
+                    #     product.thumbnail_key = Key
                 
-                    db.session.commit()
+                    # db.session.commit()
 
-                    first += 1
+                    # first += 1
         
         flash("You have successfully added new stuff for sell")
     users = User.query.all()
     return render_template("add_items.html", users=users)
     
 
-def get_url(product):
-    storage_key = os.environ.get("aws_key")
-    storage_secret = os.environ.get("aws_secret")
-    storage_bucket = "dataslid"
-    urlExpiryTime = 604799
-    download_expiry_time = time.time() + urlExpiryTime
-    conn = boto3.client(
-        's3',
-        aws_access_key_id=storage_key,
-        aws_secret_access_key=storage_secret
-        )
-    
-    print(product)
-
-    if "<class 'list'>" == str(type(product)): 
-        if len(product) > 0:
-            for _product in product:
-                current_time = time.time()
-                expiry_time = _product.s3_expiry_time
-                if not expiry_time:
-                    expiry_time = 0
-
-                if current_time > expiry_time:
-                    if _product.download_link:
-                        Key = _product.download_key    
-                        download_link = conn.generate_presigned_url(ClientMethod='get_object', Params={
-                        'Bucket': storage_bucket,
-                        'Key': Key
-                    }, ExpiresIn=urlExpiryTime)
-                        _product.download_link = download_link
-
-
-                    if _product.demo_link:
-                        Key = _product.download_key    
-                        demo_link = conn.generate_presigned_url(ClientMethod='get_object', Params={
-                        'Bucket': storage_bucket,
-                        'Key': Key
-                    }, ExpiresIn=urlExpiryTime)
-
-                        _product.demo_link = demo_link
-
-                    if _product.thumbnail:
-                        Key = _product.download_key    
-                        thumbnail = conn.generate_presigned_url(ClientMethod='get_object', Params={
-                        'Bucket': storage_bucket,
-                        'Key': Key
-                    }, ExpiresIn=urlExpiryTime)
-
-                        _product.thumbnail = thumbnail
-                _product.s3_expiry_time = download_expiry_time
-                db.session.commit()
-    else:
-        current_time = time.time()
-        expiry_time = product.s3_expiry_time     
-        if current_time > expiry_time:
-            if product.download_link:
-                Key = product.download_key    
-                download_link = conn.generate_presigned_url(ClientMethod='get_object', Params={
-                'Bucket': storage_bucket,
-                'Key': Key
-            }, ExpiresIn=urlExpiryTime)
-
-            product.download_link = download_link
-
-            if product.demo_link:
-                Key = product.download_key    
-                demo_link = conn.generate_presigned_url(ClientMethod='get_object', Params={
-                'Bucket': storage_bucket,
-                'Key': Key
-            }, ExpiresIn=urlExpiryTime)
-
-            product.demo_link = demo_link
-
-            if product.thumbnail:
-                Key = product.download_key    
-                thumbnail = conn.generate_presigned_url(ClientMethod='get_object', Params={
-                'Bucket': storage_bucket,
-                'Key': Key
-            }, ExpiresIn=urlExpiryTime)
-
-            product.thumbnail = thumbnail
-
-        product.s3_expiry_time = download_expiry_time
-        db.session.commit()
-
-#     pass
-
-# @app.route("/download", methods=["GET", "POST"])
-# def download():
-#     storage_key = os.environ.get("aws_key")
-#     storage_secret = os.environ.get("aws_secret")
-#     user_id = current_user.id
-#     getUser = User.query.get(user_id)
-#     conn = boto3.client(
-#             's3',
-#         aws_access_key_id=storage_key,
-#         aws_secret_access_key=storage_secret
-#             )
-    
-#     # storage_bucket = "betbots"
-#     # bucket_name = 'betbots'
-#     key = getUser.bet_49ja.bot_path
-#     filename = key.split('/')[1]
-#     data = conn.get_object(Bucket='marketplace', Key=key)
-#     # application/zip
-#     read_data = data['Body']
-#     #  mimetype='application/x-msdownload'
-#     return send_file(read_data, attachment_filename=filename, as_attachment=True)
 
 # Redirect / to home
 @app.route("/", methods=["GET"])
 def no_route():
     return redirect(url_for("home"))
     
-@app.route("/home", methods=["GET"])
+@app.route("/home", methods=["GET", "POST"])
 def home():
+    return render_template("dataslid/index.html")
+
+@app.route("/marketplace", methods=["GET"])
+def marketplace():
     products = Products.query.all()[:8]
-    get_url(products)
     return render_template("home.html", products=products)
 
 @app.route("/redirect", methods=["GET", "POST"])
@@ -364,7 +240,6 @@ def redirectThanks():
 def market():
     products = Products.query.order_by(Products.datetime.desc()).all()
     # Inbox.query.filter_by(seen=False, user_id=current_user.id).order_by(Inbox.datetime.desc()).all()
-    get_url(products)
     return render_template("market.html", products=products)
 
 @app.route("/carts", methods=["GET"])
@@ -381,7 +256,6 @@ def product(pk):
     search = f'({recommended_hamlet.replace(" ", ")|(")})'
     all_products = Products.query.filter(Products.id != pk, Products.title.op('regexp')(r'%s' %search)).all()[:4]
     
-    get_url(product)
     if not all_products:
         all_products = Products.query.all()[:4]
             
@@ -409,79 +283,40 @@ def edit_item(pk):
         youtube_link = request.form.get("youtube_link")
         youtube_link = youtube_filter(youtube_link)
 
-        store_id = current_user.store.id
-        product = Products(title=title, store_id=store_id, description=description, youtube_link=youtube_link, price=price, old_price=old_price)
-        db.session.add(product)
-        db.session.commit()
+        store_id = current_user.store[0].id
         
-        product_id = product.id
+        product.title = title
+        product.store_id = store_id
+        product.description = description
+        product.youtube_link = youtube_link
+        if price:
+            product.price = price
+        else:
+            product.price = 0
+
+        if old_price:
+            product.old_price = old_price
+        else:
+            product.old_price = 0
+
         
-        first = 0
+        # product_id = product.id
+        
+        # first = 0
         for i in request.files:
             file_exists = request.files.get(i)
 
             if file_exists:
-                filename = file_exists.filename
-                storage_key = os.environ.get("aws_key")
-                storage_secret = os.environ.get("aws_secret")
-                storage_bucket = "dataslid"
-                urlExpiryTime = 604799
-                download_expiry_time = time.time() + urlExpiryTime
-                # Set Expiry time
-                product.s3_expiry_time = download_expiry_time
-
-                conn = boto3.client(
-                    's3',
-                    aws_access_key_id=storage_key,
-                    aws_secret_access_key=storage_secret
-                    )
-
                 if i == "product":
-                    Key = f'product/{filename}'
-                    conn.upload_fileobj(file_exists, storage_bucket, Key)
-
-
-                    download_url = conn.generate_presigned_url(ClientMethod='get_object', Params={
-                        'Bucket': storage_bucket,
-                        'Key': Key
-                    }, ExpiresIn=urlExpiryTime)
-
-                    product.download_link = download_url
-                    product.download_key = Key
-                
+                    upload_image(product, file_exists, "download")
                 elif i == "demo_product":
-                    Key = f'demo/{filename}'
-                    conn.upload_fileobj(file_exists, storage_bucket, Key)
-
-
-                    download_url = conn.generate_presigned_url(ClientMethod='get_object', Params={
-                        'Bucket': storage_bucket,
-                        'Key': Key
-                    }, ExpiresIn=urlExpiryTime)
-
-                    product.demo_link = download_url
-                    product.demo_key = Key
-
+                    upload_image(product, file_exists, "demo")
                 else:
-                    Key = f'images/{filename}'
-                    conn.upload_fileobj(file_exists, storage_bucket, Key)
-                    image_url = conn.generate_presigned_url(ClientMethod='get_object', Params={
-                        'Bucket': storage_bucket,
-                        'Key': Key
-                    }, ExpiresIn=urlExpiryTime)
-
-                    
-                    product_image = ProductImage(image_url=image_url, product_id=product_id)
-                    db.session.add(product_image)
-                    
-                    if first == 0:
-                        product.thumbnail = image_url
-                        product.thumbnail_key = Key
-                
-                    db.session.commit()
-
-                    first += 1
+                    upload_image(product, file_exists, "image")
         
+        # db.session.add(product)
+        db.session.commit()
+
         flash("You have successfully updated the product's details")
         return redirect(url_for('product', pk=product.id))
 
@@ -511,7 +346,9 @@ def search():
 @login_required
 def admin():
     users = User.query.all()
-    return render_template("admin.html", users=users)
+    email_subs = EmailSubcribers.query.all()
+    email_len = len(email_subs)
+    return render_template("admin.html", users=users, email_len=email_len, email_subs=email_subs)
     
 
 @app.route("/manage-user", methods=["GET", "POST"])
@@ -656,11 +493,6 @@ def logout():
     flash("You've logged out successfully, do visit soon")
     return redirect(url_for("login"))
 
-# @app.route("/", methods=["GET"])
-# def download():
-#     return dict(msg="success", ok=True) 
-
-
 @app.route("/admin-settings")
 def admin_settings():
     email = EmailSubcribers.query.all()
@@ -669,16 +501,6 @@ def admin_settings():
     no_emails = len(email)
     
     return render_template("admin_settings.html", email=email, users=users, no_users=no_users, no_emails=no_emails)
-
-
-
-# @app.context_processor
-# def context_processor():
-#     request_alert = Make_request.query.filter_by(not_seen=True).all()
-#     alert = False
-#     if request_alert:
-#         alert = True
-#     return dict(alert=alert)
 
 if __name__  == '__main__':
     db.create_all()

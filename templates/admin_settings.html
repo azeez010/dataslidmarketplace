@@ -20,10 +20,10 @@
     <p id="load"></p>
     <div id="results"></div>
     <br>
-    <p>Number of E-mail subscribers: email</p>
-    <p>Number of sign-ups: no_users</p>
-    <!-- <br>
-    <form action="/mail_users" method="post"> -->
+    <p>Number of E-mail subscribers: {{ no_emails }}</p>
+    <p>Number of sign-ups: {{ no_users }}</p>
+    <br>
+    <!-- <form action="/mail_users" method="post"> -->
         <input class="border-2 placeholder-text-md border-gray-500 rounded-lg md:w-1/3 sm:3/5 mt-2 mb-2 md:py-2 sm:py-1 sm:px-1" type="text" placeholder="Mail Subjects" id="subject"><br>
         <textarea id="ckeditor" placeholder="Send mail to user(s)", class="rounded-lg bg-white md:w-1/3 sm:3/5 border-2 border-gray-500 md:h-32 sm:h-16 md:py-2 sm:py-2 sm:py-1 sm:px-1" id="" cols="30" rows="5"></textarea><br>
         <!-- {{ ckeditor.create() }} -->
@@ -31,6 +31,7 @@
         <select  class="md:w-1/3 sm:3/5 md:py-2 sm:py-1 rounded-lg border-2 border-gray-600 md:px-12 sm:px-1 md:my-4 sm:my-1" name="admin" id="user">
             <option value="" >Select who you to send emails</option>
             <option value="all">all</option>
+            <option value="email_subscriber">email_subscriber</option>
             {% for user in users %}
                 <option value="{{user.email}}">{{user.email}}</option>
         {% endfor %}
@@ -65,7 +66,7 @@
         });
         const mail_res = await send_mail.json();
         mail_info.innerText = ""
-        // console.log(mail_res);
+        console.log(mail_res);
         if(mail_res.ok){
             mail_info.innerText = "You have successfully sent the mail(s)"
             mail_info.setAttribute("class", "text-xl text-green-600 py-3 block")

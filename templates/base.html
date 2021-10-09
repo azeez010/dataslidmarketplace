@@ -8,7 +8,7 @@
     <script src="../static/jquery-3.2.1.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="..\static/tailwind.css">
-    <link rel="shortcut icon" href="../static/logo.png" type="image/x-icon">
+    <link rel="shortcut icon" href="../static/market-favicon.png" type="image/x-icon">
     <!-- ./static/tailwind.css -->
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <meta name='theme-color' content="rgb(243, 176, 176)">
@@ -140,7 +140,7 @@
     <div class="w-full bg-gray-900 mb-4 flexnav  pt-2 pb-1 md:py-2 shadow  top-0 sticky z-20 px-2 md:px-4">
         <div classs="flex flex-shrink-0">
             <div>
-                <a href="/home"><img src="../static/logo.png" class="h-8 w-24 md:h-12 md:w-36 " alt="logo"></a>
+                <a href="/marketplace"><img src="../static/logo.png" class="h-8 w-24 md:h-12 md:w-36 " alt="logo"></a>
             </div>
         </div>
         <div class="inline-block mt-4 hidden md:block">
@@ -188,7 +188,7 @@
                                 {% if current_user.is_authenticated %}
                                 {% if current_user.is_admin %}
                                     <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('add_items')}}">Add Items</a>
-                                    <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('admin')}}">Admin tab</a>
+                                    <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('admin_settings')}}">Admin tab</a>
                                     {% endif %}
                                     <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('logout')}}">logout</a>
                                     {% endif %}
@@ -198,7 +198,7 @@
                             <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('market')}}">Market</a>             
                             {% if current_user.is_authenticated %}
                             {% if current_user.is_admin %}
-                                        <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('admin')}}">Admin tab</a>
+                                        <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('admin_settings')}}">Admin tab</a>
                                         {% endif %}
                                     <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('logout')}}">Logout</a>
                                 {% endif %}
@@ -220,6 +220,18 @@
                 {% endif %}
             {% endwith%}
             {% block content %}{% endblock %}
+            {% if current_user.is_admin %}
+                <p class="text-red-500 text-center text-xl mb-3"><u>Admin Only Stats</u></p>
+                    <!-- BEGIN: Powered by Supercounters.com -->
+                    <center><script type="text/javascript" src="//widget.supercounters.com/ssl/online_i.js"></script><script type="text/javascript">sc_online_i(1000,"ffffff","e61c1c");</script><br><noscript><a href="https://www.supercounters.com/">free online counter</a></noscript>
+                    </center>
+                    <!-- END: Powered by Supercounters.com -->
+
+                    <!-- BEGIN: Powered by Supercounters.com -->
+                <center><script type="text/javascript" src="//widget.supercounters.com/ssl/flag.js"></script><script type="text/javascript">sc_flag(1000  ,"FFFFFF","000000","cccccc",2,10,0,0)</script><br><noscript><a href="http://www.supercounters.com/">Flag Counter</a></noscript>
+                </center>
+                <!-- END: Powered by Supercounters.com -->
+            {% endif %}
         </section>
         <div class="relative sm:py-2 md:py-4 sm:px-8 md:px-16 sm:block flexI sm:block md:flex bg-gray-900 -z-30 rounded-tl-xl rounded-tr-xl">
             <div class="ml-2 md:ml-4 py-2 md:py-4">
@@ -249,7 +261,7 @@
         if(!popupSubscribed){
             if(!popupInterval) popup()
     
-            popupInterval ?? localStorage.setItem("popup_interval", 7)
+            popupInterval ?? localStorage.setItem("popup_interval", 15)
     
             popupInterval = Number(localStorage.getItem("popup_interval"))
     
@@ -386,8 +398,7 @@
             body: JSON.stringify({email})
         });
         const listResponse = await join_list.json();
-        console.log(listResponse)
-       
+        
         $("#emailInput").val("")
         
         if(listResponse.ok){

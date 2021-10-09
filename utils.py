@@ -1,219 +1,10 @@
 from flask_login import current_user 
 from models import User, app, db
+from random import randrange
 from botocore.exceptions import ClientError
 import boto3, os, time
-
-
-
 from flask import request, render_template, jsonify
 
-# def get_aws_url(product):
-#     storage_key = os.environ.get("aws_key")
-#     storage_secret = os.environ.get("aws_secret")
-#     storage_bucket = "myturkeyapp"
-#     urlExpiryTime = 604799
-#     download_expiry_time = time.time() + urlExpiryTime
-#     conn = boto3.client(
-#         's3',
-#         aws_access_key_id=storage_key,
-#         aws_secret_access_key=storage_secret
-#         )
-    
-    # if "<class 'list'>" == str(type(product)) and len(product) > 0:
-    #     for _product in product:
-#             current_time = time.time()
-#             expiry_time = _product.s3_expiry_time
-#             if not expiry_time:
-#                 expiry_time = 0
-
-#             if current_time > expiry_time:
-#                 if _product.download_link:
-#                     Key = _product.download_key    
-#                     download_link = conn.generate_presigned_url(ClientMethod='get_object', Params={
-#                     'Bucket': storage_bucket,
-#                     'Key': Key
-#                 }, ExpiresIn=urlExpiryTime)
-#                     _product.download_link = download_link
-
-
-#                 if _product.demo_link:
-#                     Key = _product.download_key    
-#                     demo_link = conn.generate_presigned_url(ClientMethod='get_object', Params={
-#                     'Bucket': storage_bucket,
-#                     'Key': Key
-#                 }, ExpiresIn=urlExpiryTime)
-
-#                     _product.demo_link = demo_link
-
-#                 if _product.thumbnail:
-#                     Key = _product.download_key    
-#                     thumbnail = conn.generate_presigned_url(ClientMethod='get_object', Params={
-#                     'Bucket': storage_bucket,
-#                     'Key': Key
-#                 }, ExpiresIn=urlExpiryTime)
-
-#                     _product.thumbnail = thumbnail
-#             _product.s3_expiry_time = download_expiry_time
-#             db.session.commit()
-#     else:
-#         current_time = time.time()
-#         expiry_time = product.s3_expiry_time     
-#         if current_time > expiry_time:
-#             if product.download_link:
-#                 Key = product.download_key    
-#                 download_link = conn.generate_presigned_url(ClientMethod='get_object', Params={
-#                 'Bucket': storage_bucket,
-#                 'Key': Key
-#             }, ExpiresIn=urlExpiryTime)
-
-#             product.download_link = download_link
-
-#             if product.demo_link:
-#                 Key = product.download_key    
-#                 demo_link = conn.generate_presigned_url(ClientMethod='get_object', Params={
-#                 'Bucket': storage_bucket,
-#                 'Key': Key
-#             }, ExpiresIn=urlExpiryTime)
-
-#             product.demo_link = demo_link
-
-#             if product.thumbnail:
-#                 Key = product.download_key    
-#                 thumbnail = conn.generate_presigned_url(ClientMethod='get_object', Params={
-#                 'Bucket': storage_bucket,
-#                 'Key': Key
-#             }, ExpiresIn=urlExpiryTime)
-
-#             product.thumbnail = thumbnail
-
-#         product.s3_expiry_time = download_expiry_time
-#         db.session.commit()
-
-def get_image_url(product):
-    storage_key = os.environ.get("aws_key")
-    storage_secret = os.environ.get("aws_secret")
-    storage_bucket = "myturkeyapp"
-    urlExpiryTime = 604799
-    url_expiry_time = time.time() + urlExpiryTime
-    current_time = time.time()
-    
-    conn = boto3.client(
-        's3',
-        aws_access_key_id=storage_key,
-        aws_secret_access_key=storage_secret
-        )
-    if product:
-        if "<class 'list'>" == str(type(product)) and len(product) > 0:
-            for _product in product:
-                current_time = time.time()
-                expiry_time = _product.s3_expiry_time
-                if not expiry_time:
-                    expiry_time = 0
-
-                if current_time > expiry_time and _product.image_key:
-                    Key = _product.image_key    
-                    thumbnail = conn.generate_presigned_url(ClientMethod='get_object', Params={
-                    'Bucket': storage_bucket,
-                    'Key': Key
-                }, ExpiresIn=urlExpiryTime)
-
-                    _product.image_url = thumbnail
-                    _product.s3_expiry_time = url_expiry_time
-                    db.session.commit()
-        else:
-            current_time = time.time()
-            expiry_time = product.s3_expiry_time     
-            
-            if current_time > expiry_time:
-                Key = product.image_key    
-                image_url = conn.generate_presigned_url(ClientMethod='get_object', Params={
-                'Bucket': storage_bucket,
-                'Key': Key
-            }, ExpiresIn=urlExpiryTime)
-
-                product.image_url = image_url
-                product.s3_expiry_time = url_expiry_time
-                db.session.commit()
-
-def get_profile_url():
-    storage_key = os.environ.get("aws_key")
-    storage_secret = os.environ.get("aws_secret")
-    storage_bucket = "myturkeyapp"
-    urlExpiryTime = 604799
-    url_expiry_time = time.time() + urlExpiryTime
-    current_time = time.time()
-
-    pic_expiry = current_user.s3_expiry_time
-    
-    # Run this when pictures expires
-    if current_time > pic_expiry:
-        conn = boto3.client(
-            's3',
-            aws_access_key_id=storage_key,
-            aws_secret_access_key=storage_secret
-            )
-        
-        Key = current_user.thumbnail_key
-        image_url = conn.generate_presigned_url(ClientMethod='get_object', Params={
-            'Bucket': storage_bucket,
-            'Key': Key
-        }, ExpiresIn=urlExpiryTime)
-
-        current_user.thumbnail_url = image_url
-        current_user.s3_expiry_time = url_expiry_time
-
-def get_product_url(product):
-    print(product, "!!!")
-    if product:
-
-        print(product, "Came here")
-        storage_key = os.environ.get("aws_key")
-        storage_secret = os.environ.get("aws_secret")
-        storage_bucket = "myturkeyapp"
-        urlExpiryTime = 604799
-        url_expiry_time = time.time() + urlExpiryTime
-        current_time = time.time()
-        
-        conn = boto3.client(
-            's3',
-            aws_access_key_id=storage_key,
-            aws_secret_access_key=storage_secret
-            )
-
-        if "<class 'list'>" == str(type(product)) and len(product) > 0:
-
-            print("Hello too")
-            for _product in product:
-                current_time = time.time()
-                expiry_time = _product.s3_expiry_time
-                if not expiry_time:
-                    expiry_time = 0
-
-                print(current_time, expiry_time, _product.thumbnail_key)
-                if current_time > expiry_time  and _product.thumbnail_key:
-                    Key = _product.thumbnail_key    
-                    thumbnail = conn.generate_presigned_url(ClientMethod='get_object', Params={
-                    'Bucket': storage_bucket,
-                    'Key': Key
-                }, ExpiresIn=urlExpiryTime)
-                    print(thumbnail)
-                    _product.thumbnail_url = thumbnail
-                    _product.s3_expiry_time = url_expiry_time
-                    db.session.commit()
-        else:
-            current_time = time.time()
-            expiry_time = product.s3_expiry_time     
-            
-            if current_time > expiry_time and product.thumbnail_key:
-                Key = product.download_key    
-                thumbnail_url = conn.generate_presigned_url(ClientMethod='get_object', Params={
-                'Bucket': storage_bucket,
-                'Key': Key
-            }, ExpiresIn=urlExpiryTime)
-
-                product.thumbnail_url = thumbnail_url
-                product.s3_expiry_time = url_expiry_time
-                db.session.commit()
 
 def push_email(recipient, subject, message):
     # Replace sender@example.com with your "From" address.
@@ -342,7 +133,7 @@ def delete_image(Key):
     if Key:
         storage_key = os.environ.get("aws_key")
         storage_secret = os.environ.get("aws_secret")
-        storage_bucket = "myturkeyapp"
+        storage_bucket = "dataslid"
         
         # Set Expiry time
         conn = boto3.client(
@@ -354,17 +145,12 @@ def delete_image(Key):
         # delete object
         conn.delete_object(Bucket=storage_bucket, Key=Key)
 
-def upload_image(model, image):
+def upload_image(model, image, upload_type):
     if image:
         # Connect with credentials
         storage_key = os.environ.get("aws_key")
         storage_secret = os.environ.get("aws_secret")
-        storage_bucket = "myturkeyapp"
-        urlExpiryTime = 604799
-        download_expiry_time = time.time() + urlExpiryTime
-        
-        # Set Expiry time
-        model.s3_expiry_time = download_expiry_time
+        storage_bucket = "dataslid"
 
         conn = boto3.client(
             's3',
@@ -372,18 +158,32 @@ def upload_image(model, image):
             aws_secret_access_key=storage_secret
             )
 
+        key_salt = randrange(0, 100000)
+
         filename = image.filename
-        Key = f'store/{filename}'
+        Key = f'{upload_type}/{filename}-{key_salt}'
         conn.upload_fileobj(image, storage_bucket, Key)
 
+        upload_url = f"https://{storage_bucket}.s3.amazonaws.com/{Key}"
+        
+        print(upload_type)
+        # elif upload_type == "thumbnail":
+        #     model.image = upload_url
+        #     model.image_key = Key
+        if upload_type == "image":
+            model.thumbnail = upload_url
+            model.thumbnail_key = Key
+        
+        elif upload_type == "demo":
+            model.demo_link = upload_url
+            model.demo_key = Key
+        
+        elif upload_type == "download":
+            model.download_link = upload_url
+            model.download_key = Key
+        
 
-        image_url = conn.generate_presigned_url(ClientMethod='get_object', Params={
-            'Bucket': storage_bucket,
-            'Key': Key
-        }, ExpiresIn=urlExpiryTime)
-
-        model.image = image_url
-        model.image_key = Key
+        
 
 def send_message_to_admins(Subject, notes):
     # Get all admin id
@@ -395,15 +195,3 @@ def send_message_to_admins(Subject, notes):
         # Check if sent to app mail box
         if check[0]:
             send_mail(subject=Subject, message=notes, recipient=admin.email)
-
-# def notification_note(name):
-#     return f"""
-#             {title} by {name}
-#             <hr />
-#             {notes}
-#             <br />  
-#             <a href='{site_name}pairing-group?id={pairing_group.id}'>Click link to check the pairing group request</a>
-#             <br />
-#             <hr />
-#             Phone: {phone}
-#         """
