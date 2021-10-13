@@ -12,8 +12,9 @@ import boto3, botocore, time, hashlib, hmac, json, os, shutil, request_func, mai
 import json, re
 
 # from werkz/eug import secure_filename
-from utils import upload_image
+from utils import upload_image, send_mail
 from helper import generate_recommendation
+from settings import PAYSTACK_SECRET
 
 humanize = Humanize(app)
 login_manager = LoginManager(app)
@@ -97,12 +98,11 @@ def main():
 
     # turn to naira from kobo
     bot_price *= 100
-    paystack_secret = os.environ.get("paystack_test")
     # bot_price = 25000 * 100
     #Instantiate the transaction object to handle transactions.  
     #Pass in your authorization key - if not set as environment variable PAYSTACK_AUTHORIZATION_KEY
     # email = "dataslid@gmail.com" "sk_test_faadf90960bad25e6a2b5c9be940792f928b73ac"
-    transaction = Transaction(authorization_key=paystack_secret)
+    transaction = Transaction(authorization_key=PAYSTACK_SECRET)
     # transaction_table = Transaction_Table.query.filter_by(email=email).first()
     
     # only Start another transaction when one is completed
@@ -480,9 +480,15 @@ def signup():
 @app.route("/subscribe-to-mail", methods=["GET", "POST"])
 def email_subscribers():
     email = request.json.get("email")
-    email_subscribers = EmailSubcribers(email=email)
-    db.session.add(email_subscribers)
-    db.session.commit()
+    email_exists = EmailSubcribers.query.filter_by(email=email).first()
+    total_emails = len(email_exists)
+    
+    if not email_exists:
+        email_subscribers = EmailSubcribers(email=email)
+        db.session.add(email_subscribers)
+        db.session.commit()
+    
+    send_mail("Someone joined the newsletters", f"{email} just joined us at Dataslid tech, Total number = {total_emails}", "azeezolabode010@gmail.com")
     return dict(msg="success", ok=True)
 
 

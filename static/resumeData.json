@@ -1,0 +1,139 @@
+{
+  "main": {
+    "name": "Azeez Olabode",
+    "occupation": "Software engineer",
+    "description": "I eat, sleep and breathe React",
+    "image": "profile_pic.jpg",
+    "bio": "Hello 👋!  I'm Azeez Olabode. I have experience developing software for more than three years. My expertise are in writing fool-proof backend and frontend applications, I also have hands on experience with devOps concepts. Contact me for any collaborations.",
+    "contactmessage": "Get in touch with me ! or Send a feedback !",
+    "email": "azeezolabode010@gmail.com",
+    "phone": "+234 8142700835",
+    "address": {
+      "street": "Badagry, Lagos",
+      "city": "Lagos",
+      "state": "Lagos State",
+      "zip": "103101"
+    },
+    "website": "https://autodevpy.netlify.app/",
+    "resumedownload": "https://autodevpy.netlify.app/static/resume.pdf",
+    "social": [
+      {
+        "name": "youtube",
+        "url": "https://www.youtube.com/channel/UC2CnO0lfpt6w7zbHTZE6BzA",
+        "className": "fa fa-youtube"
+      },
+      {
+        "name": "facebook",
+        "url": "https://web.facebook.com/olabode.abdulazeez.58",
+        "className": "fa fa-facebook"
+      },
+      {
+        "name": "instagram",
+        "url": "https://www.instagram.com/dataslid/",
+        "className": "fa fa-instagram"
+      },
+      {
+        "name": "github",
+        "url": "https://github.com/azeez010",
+        "className": "fa fa-github"
+      },
+      {
+        "name": "linkedin",
+        "url": "https://www.linkedin.com/in/aman-janwani-8bab591bb/",
+        "className": "fa fa-linkedin"
+      }
+    ]
+  },
+  "resume": {
+    "skillmessage": "My Programming Language Proficiency",
+    "education": [
+      {
+        "school": "Ladoke Akintola University (LAUTECH)",
+        "degree": "Microbiology B.Tech"
+      }
+    ],
+    "skills": [
+      {
+        "name": "ReactJs",
+        "level": "80%"
+      },
+      {
+        "name": "Python",
+        "level": "50%"
+      },
+      {
+        "name": "Git",
+        "level": "70%"
+      },
+      {
+        "name": "JavaScript",
+        "level": "99%"
+      },
+      {
+        "name": "Web Development",
+        "level": "95%"
+      }
+    ]
+  },
+  "portfolio": {
+    "projects": [
+      {
+        "title": "Turkey importation and e-commerce application",
+        "category": "",
+        "image": "myturkeyapp.png",
+        "url": "https://myturkeyapp.com"
+      },
+      {
+        "title": "Wisefex bitcoin/naira Investment",
+        "category": "",
+        "image": "wisefex.png",
+        "url": "https://wisefex.pythonanywhere.com"
+      },
+   
+      {
+        "title": "Smart routing system",
+        "category": "",
+        "image": "smart-routing.png",
+        "url": "https://www.smartroutingsystem.com"
+      },
+      {
+        "title": "Dataslid Soft Product Marketplace",
+        "category": "",
+        "image": "marketplace.png",
+        "url": "https://dataslidmarketplace.pythonanywhere.com/marketplace"
+      },
+      {
+        "title": "Betbots Officials site",
+        "category": "",
+        "image": "bet-bot.png",
+        "url": "https://dataslid.pythonanywhere.com"
+      },
+      {
+        "title": "Virtual Application (Test)",
+        "category": "",
+        "image": "virtual-app.png",
+        "url": "https://azeez010.github.io"
+      },
+      {
+        "title": "My portfolio",
+        "category": "",
+        "image": "my-portfolio.png",
+        "url": "https://autodevpy.netlify.io"
+      },
+      {
+        "title": "African Community App (Africonn)",
+        "category": "",
+        "image": "forum.png",
+        "url": "https://africonn.pythonanywhere.com"
+      }
+    ]
+  },
+  "testimonials": {
+    "testimonials": [
+      {
+        "text": "Aman is absolutely excellent, his depth of knowledge & his mentorship really meant a lot to us... I would definitely recommend",
+        "user": "Jorge Fouto"
+      }
+    ]
+  }
+}
