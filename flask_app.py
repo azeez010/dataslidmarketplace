@@ -6,15 +6,17 @@ from is_safe_url import is_safe_url
 from schema import user_schema
 from flask_humanize import Humanize
 from datetime import datetime
+import pypaystack
 from pypaystack import Transaction
 from mailing_server import mail_folks
 import boto3, botocore, time, hashlib, hmac, json, os, shutil, request_func, mailing_server, basic_auth, string, random
 import json, re
 
 # from werkz/eug import secure_filename
-from utils import upload_image, send_mail
+from utils import upload_image, send_mail, get_two_random_number
 from helper import generate_recommendation
 from settings import PAYSTACK_SECRET
+#, check_location
 
 humanize = Humanize(app)
 login_manager = LoginManager(app)
@@ -25,6 +27,58 @@ login_manager.login_message_category = "info"
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+
+class MyTransaction(Transaction):
+    def initialize(
+        self, email, amount, currency, plan=None, reference=None, channel=None, metadata=None
+    ):
+        """
+        Initialize a transaction and returns the response
+        args:
+        email -- Customer's email address
+        amount -- Amount to charge
+        plan -- optional
+        Reference -- optional
+        channel -- channel type to use
+        metadata -- a list if json data objects/dicts
+        """
+        amount = pypaystack.utils.validate_amount(amount)
+
+        if not email:
+            raise pypaystack.InvalidDataError("Customer's Email is required for initialization")
+
+        url = self._url("/transaction/initialize")
+        payload = {
+            "email": email,
+            "amount": amount,
+            "currency": currency,
+        }
+
+        if plan:
+            payload.update({"plan": plan})
+        if channel:
+            payload.update({"channels": channel})
+        if reference:
+            payload.update({"reference": reference})
+        if metadata:
+            payload = payload.update({"metadata": {"custom_fields": metadata}})
+
+        return self._handle_request("POST", url, payload)
+# user_location = GeoIP2()
+# try:
+#     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+
+#     if x_forwarded_for:
+#         ip = x_forwarded_for.split(',')[0]
+#     else:
+#         ip = request.META.get('REMOTE_ADDR')
+
+#     user_city = user_location.city(ip)
+#     save_location.city = user_city['city']
+#     save_location.country = user_city["country_code"]
+    
 
 @app.route("/callback", methods=["POST", "GET"])
 def paycallback():
@@ -98,11 +152,16 @@ def main():
 
     # turn to naira from kobo
     bot_price *= 100
+    print(f"{bot_price=}")
+    metadata = {
+        "currency": "NGN",
+        "amount": bot_price
+    }
     # bot_price = 25000 * 100
     #Instantiate the transaction object to handle transactions.  
     #Pass in your authorization key - if not set as environment variable PAYSTACK_AUTHORIZATION_KEY
     # email = "dataslid@gmail.com" "sk_test_faadf90960bad25e6a2b5c9be940792f928b73ac"
-    transaction = Transaction(authorization_key=PAYSTACK_SECRET)
+    transaction = MyTransaction(authorization_key=PAYSTACK_SECRET)
     # transaction_table = Transaction_Table.query.filter_by(email=email).first()
     
     # only Start another transaction when one is completed
@@ -115,11 +174,15 @@ def main():
     #         db.session.commit()
     #         return redirect('/my-downloads')
     #     else:
-    init_transaction = transaction.initialize(email, bot_price)
+    #  metadata=metadata NGN
+    init_transaction = transaction.initialize(email, bot_price, "NGN")
+    print(init_transaction)
     reference = init_transaction[3].get('reference')
     transaction = Transaction_Table(ref_no=reference, product_data=data)
     db.session.add(transaction)
     db.session.commit()
+    
+    
     return redirect(init_transaction[3].get('authorization_url'))    
 
 
@@ -152,6 +215,8 @@ def add_items():
         old_price = request.form.get("old_price")
         youtube_link = request.form.get("youtube_link")
         course_link = request.form.get("course_link")
+        support_link = request.form.get("support_link")
+        
         course_preview_link = request.form.get("course_preview_link")
 
         product_type = request.form.get("product_type")
@@ -160,7 +225,7 @@ def add_items():
         course_link = youtube_filter(course_link)
         course_preview_link = youtube_filter(course_preview_link)
         store_id = current_user.store[0].id
-        product = Products(title=title, store_id=store_id, product_type=product_type, course_link=course_link, course_preview_link=course_preview_link, description=description, youtube_link=youtube_link, price=price, old_price=old_price)
+        product = Products(title=title, store_id=store_id, product_type=product_type, course_link=course_link, support_link=support_link, course_preview_link=course_preview_link, description=description, youtube_link=youtube_link, price=price, old_price=old_price)
         db.session.add(product)
         
         
@@ -229,6 +294,9 @@ def home():
 
 @app.route("/marketplace", methods=["GET"])
 def marketplace():
+    ip_addr = request.remote_addr
+    # loc = check_location(ip_addr)
+    # print(loc)
     products = Products.query.all()[:8]
     return render_template("home.html", products=products)
 
@@ -257,10 +325,14 @@ def product(pk):
     all_products = Products.query.filter(Products.id != pk, Products.title.op('regexp')(r'%s' %search)).all()[:4]
     
     if not all_products:
-        all_products = Products.query.all()[:4]
+        products = Products.query.filter(Products.id != pk)
+        products_len = products.count()
+        start, end = get_two_random_number(products_len)
+    
+        # Slice Data out
+        all_products = products.all()[start:end]
             
     if current_user.is_authenticated:
-
         user_purchased = UserProducts.query.filter_by(user_id=current_user.id, product_id =pk).first()
         return render_template("product.html", product=product, products=all_products, user_purchased=user_purchased)
     else:
@@ -281,14 +353,18 @@ def edit_item(pk):
         price = request.form.get("new_price")
         old_price = request.form.get("old_price")
         youtube_link = request.form.get("youtube_link")
+        support_link = request.form.get("support_link")
+        
         youtube_link = youtube_filter(youtube_link)
-
+        
         store_id = current_user.store[0].id
         
         product.title = title
+        product.support_link = support_link
         product.store_id = store_id
         product.description = description
         product.youtube_link = youtube_link
+        
         if price:
             product.price = price
         else:
@@ -299,10 +375,6 @@ def edit_item(pk):
         else:
             product.old_price = 0
 
-        
-        # product_id = product.id
-        
-        # first = 0
         for i in request.files:
             file_exists = request.files.get(i)
 
@@ -314,7 +386,6 @@ def edit_item(pk):
                 else:
                     upload_image(product, file_exists, "image")
         
-        # db.session.add(product)
         db.session.commit()
 
         flash("You have successfully updated the product's details")

@@ -137,6 +137,7 @@ class Products(db.Model):
     store_id = db.Column(db.Integer(), db.ForeignKey(Store.id))
     datetime = db.Column(db.DateTime, default=datetime.now())
     
+    support_link = db.Column(db.String(1500))
     # Links
     product_type = thumbnail = db.Column(db.String(100)) 
     course_preview_link = db.Column(db.String(1000))

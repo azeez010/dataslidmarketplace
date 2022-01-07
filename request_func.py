@@ -38,8 +38,6 @@ def new_request():
         end_page = post_per_page * page
         new_requests = Make_request.query.order_by(Make_request.datetime.desc()).all()[start_page:end_page]
         request_list = request_schema.dumps(new_requests)
-        # print(request_list)
-        print(request_list)
         return {"requests": request_list}
     else:
         new_requests = Make_request.query.order_by(Make_request.datetime.desc()).all()

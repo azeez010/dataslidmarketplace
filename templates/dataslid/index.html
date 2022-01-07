@@ -47,7 +47,7 @@
       <nav id="navbar" class="navbar">
         <ul>
           <li><a class="nav-link scrollto active" href="#hero">Home</a></li>
-          <li class="dropdown"><a href="/marketplace"><span>marketplace</span></a></li>
+          <li class="dropdown" id="marketplace"><a href="/marketplace">marketplace</a></li>
           <li><a class="nav-link scrollto" href="#services">Services</a></li>
           <li><a class="nav-link scrollto" href="#portfolio">Portfolio</a></li>
           <li><a class="nav-link scrollto" href="#team">Team</a></li>
@@ -88,11 +88,19 @@
           <h1 data-aos="fade-up">We offer modern solutions for growing your business</h1>
           <h2 data-aos="fade-up" data-aos-delay="400">We are team of talented software engineers with one goal, to build and scale Your Businesses</h2>
           <div data-aos="fade-up" data-aos-delay="600">
-            <div class="text-center text-lg-start">
-              <a href="https://api.whatsapp.com/send/?phone=2348142700835&amp;text&amp;app_absent=0" class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center">
-                <span>Get Started</span>
-                <i class="bi bi-arrow-right"></i>
-              </a>
+            <div class="flex flex-lg-row">
+              <div class="text-center text-lg-start">
+                <a href="https://api.whatsapp.com/send/?phone=2348142700835&amp;text&amp;app_absent=0" class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center">
+                  <span>Get Started</span>
+                  <i class="bi bi-arrow-right"></i>
+                </a>
+              </div>
+              <div class="text-center ml-4 text-lg-start">
+                <a href="/marketplace" class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center">
+                  <span>Marketplace</span>
+                  <i class="bi bi-house"></i>
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -1265,6 +1273,9 @@ We accept cheques, Transfers, and Cash.
   <div class="elfsight-app-71cd6ef2-6f2b-494a-b49f-3793041a32d2"></div>
   <script>
     $(document).ready(function(){
+      $("#marketplace").click(function(){
+        window.location.href = "/marketplace"
+      })
       $("#joinBtn").click(function(e){
         e.preventDefault()
           emailListFunc("#emailInput")

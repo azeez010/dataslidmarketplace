@@ -3,7 +3,7 @@
 {% block content%}
 <div>
     <div class ="bg-white shadow rounded-lg p-1 p-4">
-        <p><b>{{ product.title}}</b></p>
+        <p class="text-2xl"><b>{{ product.title}}</b></p>
         <div class="flex">
             <div>
                 <img src="{{product.thumbnail}}" class="w-full md:w-2/5" alt="">
@@ -16,13 +16,17 @@
             <br>
         </div>
         <div class="mt-2">
-
-                <p><i><b>description</b></i></p>
-                <p>{{ product.description}}</p>
-                <br>
+            {% if product.youtube_link %}
+                <div class="my-2">
+                    <iframe src="{{product.youtube_link}}" frameborder="0" class="w-full md:w-3/5 h-48 md:h-64 m-auto"></iframe>
+                </div>
+            {% endif %}
+            <p class="text-xl"><i><b>description</b></i></p>
+            <p>{{ product.description}}</p>
+            <br>
         
                 {% if product.product_type == "course" %}
-                    {% if product.course_preview_link %}
+                {% if product.course_preview_link %}
                         <div class="my-2">
                             <iframe src="{{ product.course_preview_link }}" frameborder="0" class="w-full md:w-3/5 h-48 md:h-64 m-auto"></iframe>
                         </div>
@@ -51,11 +55,6 @@
                         {% endif %}
                     {% endif %}
         
-                    {% if product.youtube_link %}
-                        <div class="my-2">
-                            <iframe src="{{product.youtube_link}}" frameborder="0" class="w-full md:w-3/5 h-48 md:h-64 m-auto"></iframe>
-                        </div>
-                    {% endif %}
                     {% if current_user.is_authenticated %}
                         {% if current_user.id == product.store.user.id %}    
                             <a href="../edit-item/{{ product.id }}">Edit product</a>
@@ -75,7 +74,7 @@
         </div>
         <div >
             {% if products %}
-                <p class="text-yellow-500 md:text-2xl sm:text-xl hero-title text-center">related <span class="border-b-2 text-blue-900 border-yellow-500">Products</span></p>
+                <p class="text-yellow-500 my-3 text-2xl md:text-2xl hero-title text-center">related <span class="border-b-2 text-blue-900 border-yellow-500">Products</span></p>
             {% endif %}    
         </div>
         <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4">

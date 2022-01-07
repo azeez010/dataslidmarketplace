@@ -4,6 +4,7 @@ from random import randrange
 from botocore.exceptions import ClientError
 import boto3, os, time
 from flask import request, render_template, jsonify
+from random import randint
 
 
 def push_email(recipient, subject, message):
@@ -195,3 +196,22 @@ def send_message_to_admins(Subject, notes):
         # Check if sent to app mail box
         if check[0]:
             send_mail(subject=Subject, message=notes, recipient=admin.email)
+
+def get_two_random_number(len_of_products):
+    product_len = len_of_products
+    slice_range = 4
+    end = randint(0, product_len)
+    
+    if slice_range > end:
+        end += slice_range
+        
+        if product_len < slice_range:
+            slice_range = product_len 
+
+        if end > product_len:
+            diff = end - product_len 
+            end -= diff
+
+        
+    start = end - slice_range
+    return start, end

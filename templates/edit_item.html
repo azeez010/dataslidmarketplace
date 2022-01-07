@@ -13,6 +13,9 @@
         <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " name="new_price" type="text" placeholder="New price" value="{% if product.price %}{{ product.price }}{% endif %}" id=""><br>
         <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " name="youtube_link" type="text" placeholder="youtube link" value="{% if product.youtube_link %}{{ product.youtube_link }}{% endif %}" id=""><br>
         
+        <p>Support group</p>
+        <input type="text" name="support_link" id="" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " type="text" placeholder="Support link"  value="{% if product.support_link %}{{ product.support_link }}{% endif %}">
+        
         <div>
             <p>Upload the soft product's demo (optional)</p>
             <input type="file" name="demo_product" id="" value="{% if product.demo_link %}{{ product.demo_link }}{% endif %}" >
@@ -27,7 +30,7 @@
             <input type="file" name="picture1" id="" value="{% if product.thumbnail_link %}{{ product.thumbnail_link }}{% endif %}">
         </div>
         <br>
-        <button id="send_btn" class="bg-gray-500 hover hover:bg-gray-700 shadow-sm:hover text-white p-1 rounded-lg sm:mt-1 md:mt-2 md:py-2 md:px-8 sm:py-2 sm:px-4 sm:text-sm md:text-lg">Add product</button>
+        <button id="send_btn" class="bg-gray-500 hover hover:bg-gray-700 shadow-sm:hover text-white p-1 rounded-lg sm:mt-1 md:mt-2 md:py-2 md:px-8 sm:py-2 sm:px-4 sm:text-sm md:text-lg">Edit product</button>
     </form>
 
     <button id="add_picture">+ Add Pictures</button>
