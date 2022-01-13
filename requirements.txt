@@ -7,8 +7,9 @@ asgiref==3.3.1
 async-timeout==4.0.2
 asyncio==3.4.3
 attrs==21.4.0
+BaseAPI==0.1.1
 billiard==3.6.3.0
-bitcoin
+bitcoin==1.1.39
 blinker==1.4
 blockcypher==1.0.90
 boto3==1.16.61
@@ -19,6 +20,7 @@ chardet==3.0.4
 charset-normalizer==2.0.9
 click==7.1.2
 crypto==1.4.1
+Django==3.1.6
 dnspython==2.1.0
 email-validator==1.1.2
 eth-hash==0.3.2
@@ -56,7 +58,7 @@ marshmallow-sqlalchemy==0.24.1
 maxminddb==2.2.0
 MouseInfo==0.1.3
 multidict==5.2.0
-mysqlclient
+mysqlclient 
 Naked==0.1.31
 passlib==1.7.2
 Pillow==8.2.0
@@ -91,4 +93,3 @@ vine==1.3.0
 Werkzeug==2.0.1
 WTForms==2.3.3
 yarl==1.7.2
-baseapi
