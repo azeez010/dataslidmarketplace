@@ -1,4 +1,6 @@
-from flask import Flask, request, send_file, jsonify, send_from_directory, render_template, flash, redirect, url_for
+import boto3, os, json, re
+
+from flask import  request, render_template, flash, redirect, url_for
 from passlib.hash import md5_crypt
 from forms import MyForm, LoginForm, TestimonyForm 
 from models import Products, Store, UserProducts, User, EmailSubcribers, Testimonial, app, db, LoginManager, login_required, login_user, logout_user, current_user, Transaction_Table, current_user
@@ -7,15 +9,10 @@ from schema import user_schema
 from flask_humanize import Humanize
 from datetime import datetime
 from pypaystack import Transaction
-from mailing_server import mail_folks
-import boto3, botocore, time, hashlib, hmac, json, os, shutil, request_func, mailing_server, basic_auth, string, random
-import json, re
 
-# from werkz/eug import secure_filename
 from utils import upload_image, send_mail, get_two_random_number
 from helper import generate_recommendation
 from settings import PAYSTACK_SECRET
-#, check_location
 
 humanize = Humanize(app)
 login_manager = LoginManager(app)
