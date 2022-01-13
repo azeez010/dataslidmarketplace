@@ -6,7 +6,6 @@ from is_safe_url import is_safe_url
 from schema import user_schema
 from flask_humanize import Humanize
 from datetime import datetime
-import pypaystack
 from pypaystack import Transaction
 from mailing_server import mail_folks
 import boto3, botocore, time, hashlib, hmac, json, os, shutil, request_func, mailing_server, basic_auth, string, random
