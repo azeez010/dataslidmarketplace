@@ -8,7 +8,7 @@ async-timeout==4.0.2
 asyncio==3.4.3
 attrs==21.4.0
 billiard==3.6.3.0
-bitcoin==1.1.39
+bitcoin
 blinker==1.4
 blockcypher==1.0.90
 boto3==1.16.61
