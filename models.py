@@ -1,3 +1,4 @@
+import os
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, request, jsonify
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user, UserMixin
@@ -10,8 +11,13 @@ from flask_ckeditor import CKEditor
 
 app = Flask(__name__)
 
+URL = os.environ.get("DATABASE_URL")
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://azeez:azeez007@localhost/dataslid'
+if URL:
+    app.config['SQLALCHEMY_DATABASE_URI'] = URL
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://azeez:azeez007@localhost/dataslid'
+
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://dataslid:azeez007@dataslid.mysql.pythonanywhere-services.com/dataslid$betbot'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False 
 app.config['SECRET_KEY'] = "d27e0926-13d9-11eb-900d-18f46ae7891e"
