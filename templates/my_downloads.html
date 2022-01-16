@@ -1,10 +1,10 @@
 {% extends "./base.html"%}
-{% block title %}Home{% endblock %}
+{% block title %}My downloads{% endblock %}
 {% block content%}
 <div>
-        <div >
-            <p class="text-yellow-500 md:text-2xl sm:text-xl hero-title text-center">All <span class="border-b-2 text-blue-900 border-yellow-500">Downloaded soft products</span></p>
-            </div>
+    <div >
+        <p class="text-yellow-500 md:text-2xl sm:text-xl hero-title text-center">All <span class="border-b-2 text-blue-900 border-yellow-500">Downloaded soft products</span></p>
+        </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
                 {% for download in my_downloads %}
                     <div product_id="{{download.product.id}}"class="market p-2 cursor-pointer my-3 w-72 mx-auto md:w-64 rounded-lg  text-black dark:text-white sm:mt-2 shadow-md bg-white dark:bg-gray-700 center-grid justify-center content-center eachProject">
@@ -23,7 +23,7 @@
 <script>
     $(".market").click(function(){
         let product_id = $(this).attr("product_id")
-        window.location.href = `/product/${product_id}`
+        window.location.href = `/download?product_id=${product_id}`
     })
 
     $(".buy").each(function(index){

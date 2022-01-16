@@ -1,0 +1,52 @@
+{% extends "./base.html"%}
+{% block title %}Download{% endblock %}
+{% block content%}
+<div class ="bg-white shadow rounded-lg p-1 p-4">
+        <p class="text-yellow-500 md:text-2xl sm:text-xl hero-title text-center">Down<span class="border-b-2 text-blue-900 border-yellow-500">load</span></p>
+         
+        <p class="text-2xl"><b>{{ download.product.title}}</b></p>
+        <div class="flex">
+            <div>
+                <img src="{{download.product.thumbnail}}" class="w-full md:w-2/5" alt="">
+            </div>
+            <div>
+                {% for i in download.product.product_image %}
+                    <img src="{{i.image_url}}" class="w-full h-48 md:w-2/5" alt="">
+                {% endfor %}
+            </div>
+            <br>
+        </div>
+        <div class="mt-2">
+            {% if download.product.youtube_link %}
+                <div class="my-2">
+                    <iframe src="{{download.product.youtube_link}}" frameborder="0" class="w-full md:w-3/5 h-48 md:h-64 m-auto"></iframe>
+                </div>
+            {% endif %}
+            <p class="text-xl"><i><b>description</b></i></p>
+            <p>{{ download.product.description}}</p>
+            <br>
+        
+                {% if download.product.product_type and download.product.course_preview_link %}
+                        <div class="my-2">
+                            <iframe src="{{ download.product.course_preview_link }}" frameborder="0" class="w-full md:w-3/5 h-48 md:h-64 m-auto"></iframe>
+                        </div>
+                {% endif %}
+                {% if download.product.support_link %}
+                    <p><b>Support link</b></p>
+                    <p>Click for support on Whatsapp or Telegram - {{ download.product.support_link }} </p>
+                    <br>
+                {% endif %}
+                {% if product_key %}
+                    <p><b>Product Key</b></p>
+                    <p>Copy to product to activate - {{ product_key.key }}</p>
+                    <br>
+                {% endif %}
+                <p><b>Price</b></p>
+                <p class="my-2">₦{{ download.product.price }} - <span class="text-red-600 line-through">₦{{download.product.old_price}}</span> <span id="price-off">{{100 - ((download.product.price / download.product.old_price) * 100)}}</span>% off! </p>
+                <br>
+                <a href="{{download.product.download_link}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md hover:bg-white hover:text-yellow-500 border-2 border-yellow-500">Download</a>
+            </div>
+        </div>
+     
+    </div>
+{% endblock %}

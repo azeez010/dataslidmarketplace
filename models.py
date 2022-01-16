@@ -1,7 +1,7 @@
 import os
 from flask_sqlalchemy import SQLAlchemy
-from flask import Flask, request, jsonify
-from flask_login import LoginManager, login_required, login_user, logout_user, current_user, UserMixin
+from flask import Flask
+from flask_login import UserMixin
 from datetime import date, datetime
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
@@ -35,10 +35,8 @@ manager.add_command('db', MigrateCommand)
 class User(db.Model, UserMixin ):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(30))
     is_admin = db.Column(db.Boolean, default=False)
     is_merchant = db.Column(db.Boolean, default=False)
-    phone = db.Column(db.String(15))
     email = db.Column(db.String(200))
     password = db.Column(db.String(150))
     merchant_wallet = db.Column(db.Integer, default=0)
@@ -143,6 +141,8 @@ class Products(db.Model):
     store_id = db.Column(db.Integer(), db.ForeignKey(Store.id))
     datetime = db.Column(db.DateTime, default=datetime.now())
     
+    has_product_key = db.Column(db.Boolean, default=False)
+    
     support_link = db.Column(db.String(1500))
     # Links
     product_type = thumbnail = db.Column(db.String(100)) 
@@ -197,6 +197,15 @@ class EmailSubcribers(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(350))
     date_joined = db.Column(db.DateTime, default=datetime.now())
+
+class ProductAuth(db.Model):
+    __tablename__ = 'product_auth'
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(200))
+    used = db.Column(db.Boolean, default=False)
+    product  = db.relationship(Products, backref='Productproducts', lazy=True)
+    product_id = db.Column(db.Integer(), db.ForeignKey(Products.id))
+    
 
 if __name__ == '__main__':
     manager.run()

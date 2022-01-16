@@ -3,10 +3,10 @@ from os import getenv, path
 
 ENV = getenv("env")
 
-if ENV == "pro": #or not ENV:
-    PAYSTACK_SECRET = getenv("paystack_test")
-else:
+if ENV == "LIVE":
     PAYSTACK_SECRET = getenv("paystack_live")
+else:
+    PAYSTACK_SECRET = getenv("paystack_test")
 
 static_path = path.abspath('./static')
 

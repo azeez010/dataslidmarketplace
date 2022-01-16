@@ -2,17 +2,21 @@ import boto3, os, json, re
 
 from flask import  request, render_template, flash, redirect, url_for
 from passlib.hash import md5_crypt
-from forms import MyForm, LoginForm, TestimonyForm 
-from models import Products, Store, UserProducts, User, EmailSubcribers, Testimonial, app, db, LoginManager, login_required, login_user, logout_user, current_user, Transaction_Table, current_user
 from is_safe_url import is_safe_url
-from schema import user_schema
 from flask_humanize import Humanize
+from flask_login import LoginManager, login_required, login_user, logout_user, current_user, current_user
+from forms import MyForm, LoginForm, TestimonyForm 
+from models import ProductAuth, Products, Store, UserProducts, User, EmailSubcribers, Testimonial, app, db, Transaction_Table
+from schema import user_schema
 from datetime import datetime
-from pypaystack import Transaction
+from pypaystack import Transaction, errors
+from pypaystack import utils as pay_utils
 
-from utils import upload_image, send_mail, get_two_random_number
+from utils import upload_image, send_mail, get_two_random_number, create_product_key
 from helper import generate_recommendation
 from settings import PAYSTACK_SECRET
+# For import all file basic_auth at once
+import import_all
 
 humanize = Humanize(app)
 login_manager = LoginManager(app)
@@ -40,10 +44,10 @@ class MyTransaction(Transaction):
         channel -- channel type to use
         metadata -- a list if json data objects/dicts
         """
-        amount = pypaystack.utils.validate_amount(amount)
+        amount = pay_utils.validate_amount(amount)
 
         if not email:
-            raise pypaystack.InvalidDataError("Customer's Email is required for initialization")
+            raise errors.InvalidDataError("Customer's Email is required for initialization")
 
         url = self._url("/transaction/initialize")
         payload = {
@@ -105,28 +109,39 @@ def paycallback():
             
             load_data = json.loads(data)
             
-            for i in load_data:
-                user_product = UserProducts(user_id=update_user.id, product_id=i.get("id"))
+            for _product_id in load_data:
+                product_id = _product_id.get("id")
+                # _user_product = UserProducts.query.filter_by(user_id=update_user.id, product_id=product_id).first()
+                # if _user_product:
+                user_product = UserProducts(user_id=update_user.id, product_id=product_id)
                 db.session.add(user_product)
+                # Create product key
+                create_product_key(_product_id)
 
-            # email=user_email, 
-            # update_user.bet_49ja.is_paid_bot = True
-            # update_user.bet_49ja.bot_type = "paid"
-            # update_user.bet_49ja.has_compiled = False
-            # update_user.bet_49ja.is_demo = False
-            # Commit the changes
-
-            # Transaction completed
             get_transaction.transaction_complete = True
+            db.session.commit()
+            # Delete failed transactions
+            failed_transactions = Transaction_Table.query.filter_by(amount="")
+            db.session.delete(failed_transactions)
             db.session.commit()
     else:
         return redirect(url_for('redirectThanks'))
-    # else:
-    #     return redirect("/my-downloads")
 
+# @app.route("/temp", methods=["GET", "POST"])
+# def temp():
+#     product_id = request.args.get('product_id')
+#     _user_product = UserProducts.query.filter_by(user_id=current_user.id, product_id=product_id).first()
+#     if _user_product:
+#         user_product = UserProducts(user_id=current_user.id, product_id=product_id)
+#         db.session.add(user_product)
+#         # Create product key
+#         create_product_key(product_id)
+#         db.session.commit()
+#     return redirect(url_for('my_downloads'))
+            
 
 @app.route("/paystack", methods=["GET", "POST"])
-def main():
+def paystack():
 
     """
     All Response objects are a tuple containing status_code, status, message and data
@@ -180,8 +195,6 @@ def main():
     
     
     return redirect(init_transaction[3].get('authorization_url'))    
-
-
 
 @app.route("/search", methods=["GET"])
 def search_market():
@@ -396,11 +409,20 @@ def edit_item(pk):
 def my_downloads():
     if current_user.is_authenticated:
         my_downloads = UserProducts.query.filter_by(user_id=current_user.id)
-        # all_products = Products.query.all()[:8]
         return render_template("my_downloads.html", my_downloads=my_downloads)
     else:
         return redirect('/login?next=/my-downloads')
 
+@app.route("/download", methods=["GET"])
+def download():
+    if current_user.is_authenticated:
+        product_id = request.args.get("product_id")
+        product = UserProducts.query.filter_by(product_id=product_id).first()
+        product_key = ProductAuth.query.filter_by(product_id=product_id).first()
+        return render_template("download.html", download=product, product_key=product_key)
+    else:
+        return redirect('/login?next=/my-downloads')
+        
 @app.route("/search-admin", methods=["GET"])
 @login_required
 def search():
@@ -520,16 +542,13 @@ def signup():
     form = MyForm()
     if request.method == "POST" and form.validate_on_submit():
         password = form.password.data
-        name = form.name.data
         email = form.email.data
-        phone = form.phone.data
         password = md5_crypt.hash(password)
         check_for_first_user = len(User.query.all())
+        user = User(email=email, password=password)
+        # If first make them admin
         if not check_for_first_user:
-            user = User(username=name, is_admin=True, email=email, phone=phone, password=password)
-        else:
-            user = User(username=name, is_admin=False, email=email, phone=phone, password=password)
-
+            user.is_admin = True
         
         db.session.add(user)
         db.session.commit()

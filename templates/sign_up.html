@@ -6,9 +6,7 @@
 <form method="POST" action="/signup">
   {{ form.csrf_token }}
   <dl>
-    {{ render_field(form.name, class="border-2 placeholder-text-lg border-gray-500 rounded-lg md:w-5/5  px-4 mt-1 mb-2 md:py-4 py-2 px-2 w-full md:w-lgborder-2 placeholder-text-lg border-gray-500 rounded-lg md:w-5/5  px-4 mt-1 mb-2 md:py-4 py-2 px-2 w-full md:w-lgborder-2 placeholder-text-lg border-gray-500 rounded-lg md:w-5/5  px-4 mt-1 mb-2 md:py-4 py-2 px-2 w-full md:w-lg", placeholder="your name") }}
     {{ render_field(form.email, class="border-2 placeholder-text-lg border-gray-500 rounded-lg md:w-5/5  px-4 mt-1 mb-2 md:py-4 py-2 px-2 w-full md:w-lgborder-2 placeholder-text-lg border-gray-500 rounded-lg md:w-5/5  px-4 mt-1 mb-2 md:py-4 py-2 px-2 w-full md:w-lgborder-2 placeholder-text-lg border-gray-500 rounded-lg md:w-5/5  px-4 mt-1 mb-2 md:py-4 py-2 px-2 w-full md:w-lg", placeholder="your e-mail") }}
-    {{ render_field(form.phone, class="border-2 placeholder-text-lg border-gray-500 rounded-lg md:w-5/5  px-4 mt-1 mb-2 md:py-4 py-2 px-2 w-full md:w-lgborder-2 placeholder-text-lg border-gray-500 rounded-lg md:w-5/5  px-4 mt-1 mb-2 md:py-4 py-2 px-2 w-full md:w-lgborder-2 placeholder-text-lg border-gray-500 rounded-lg md:w-5/5  px-4 mt-1 mb-2 md:py-4 py-2 px-2 w-full md:w-lg", placeholder="your phone") }}
     {{ render_field(form.password, class="border-2 placeholder-text-lg border-gray-500 rounded-lg md:w-5/5  px-4 mt-1 mb-2 md:py-4 py-2 px-2 w-full md:w-lgborder-2 placeholder-text-lg border-gray-500 rounded-lg md:w-5/5  px-4 mt-1 mb-2 md:py-4 py-2 px-2 w-full md:w-lgborder-2 placeholder-text-lg border-gray-500 rounded-lg md:w-5/5  px-4 mt-1 mb-2 md:py-4 py-2 px-2 w-full md:w-lg", placeholder="your password") }}
   </dl>
   {{ form.submit(class="bg-gray-500 hover hover:bg-gray-700 shadow-sm:hover text-white p-1 rounded-lg mt-2 md:mt-2 md:py-4 md:px-8 py-2 px-4 text-md md:text-lg w-full mt-2 md:w-lg") }}

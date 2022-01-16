@@ -1,16 +1,12 @@
-from models import UserProducts, db, app, EmailSubcribers, Confirm_mail, Transaction_Table, User, Reset_password, current_user, Make_request, Store, Products, ProductImage, Referral
-from flask import url_for, request, render_template, redirect, flash, send_from_directory, send_file, jsonify, Response
+from models import UserProducts, db, app, EmailSubcribers, ProductAuth, Transaction_Table, User, Reset_password, Make_request, Store, Products, ProductImage, Referral
+from flask import url_for, request, redirect
 from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView
-
-
-
 from flask_admin import Admin
 from flask_admin.contrib import sqla as flask_admin_sqla
 from flask_admin import AdminIndexView
 from flask_admin import expose
 from flask_admin.menu import MenuLink
-
+from flask_login import current_user
 
 class DefaultModelView(flask_admin_sqla.ModelView):
     def __init__(self, *args, **kwargs):
@@ -58,3 +54,4 @@ admin.add_view(DefaultModelView(Referral, db.session))
 admin.add_view(DefaultModelView(UserProducts, db.session))
 admin.add_view(DefaultModelView(Make_request, db.session))
 admin.add_view(DefaultModelView(EmailSubcribers, db.session))
+admin.add_view(DefaultModelView(ProductAuth, db.session))

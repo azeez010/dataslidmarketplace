@@ -1,9 +1,8 @@
-from flask_login import current_user 
-from models import User, app, db
+import uuid
+from models import User,ProductAuth, app, db
 from random import randrange
 from botocore.exceptions import ClientError
-import boto3, os, time
-from flask import request, render_template, jsonify
+import boto3, os
 from random import randint
 
 
@@ -92,7 +91,6 @@ def push_email(recipient, subject, message):
     else:
         print("Email sent! Message ID:"),
         print(response['MessageId'])
-# class Utils():
 
 def send_mail(subject, message, recipient):
     try:
@@ -101,34 +99,6 @@ def send_mail(subject, message, recipient):
     except Exception as exc:
         print(f"fail... {str(exc)}")
         return {"ok": "", "msg": str(exc)}
-
-def send_inbox_message(user_id, message):
-    try:
-        inbox = Inbox(message=message, user_id=user_id)
-        db.session.add(inbox)
-        db.session.commit()
-        return True, inbox.id
-    except Exception as e:
-        return False 
-
-
-# @app.route("/mail-users", methods=["POST"])
-# def mail_user():
-#     # Senders Mail
-#     sender_email = os.environ.get("email")
-#     user_id = int(request.json.get("user_id"))
-#     # Receiver Mail
-#     recipient = request.json.get("user")
-#     message = request.json.get("message")
-#     subject = request.json.get("subject")
-#     print(recipient)
-#     try:
-#         push_email(subject=subject, message=message, recipient=recipient)
-#         send_inbox_message(user_id=user_id, message=message)
-#         return {"ok": "true"}
-#     except Exception as exc:
-#         print(f"fail... {str(exc)}")
-#         return {"ok": "", "msg": str(exc)}
 
 def delete_image(Key):
     if Key:
@@ -182,20 +152,6 @@ def upload_image(model, image, upload_type):
         elif upload_type == "download":
             model.download_link = upload_url
             model.download_key = Key
-        
-
-        
-
-def send_message_to_admins(Subject, notes):
-    # Get all admin id
-    admins = User.query.filter_by(is_admin=True).all()
-    
-    # Send notes to all admin
-    for admin in admins:
-        check = send_inbox_message(admin.id, notes)
-        # Check if sent to app mail box
-        if check[0]:
-            send_mail(subject=Subject, message=notes, recipient=admin.email)
 
 def get_two_random_number(len_of_products):
     product_len = len_of_products
@@ -215,3 +171,14 @@ def get_two_random_number(len_of_products):
         
     start = end - slice_range
     return start, end
+
+def create_product_key(product_id):
+    key = uuid.uuid4()
+    if key is None:
+        return dict(success=False, message="No key provided"), 400 
+    
+    product = ProductAuth(key=key, product_id=product_id)
+    db.session.add(product)
+    db.session.commit()
+    
+    return dict(success=True, message="Key created"), 200
