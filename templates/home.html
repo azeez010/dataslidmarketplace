@@ -37,7 +37,7 @@
                         <p class="font-bold sm:text-lg md:text-xl p-1 md:p-2">{{_product.title}}</p>
                         <p class="md:mt-2 sm:mt-1 p-2">
                         {% if _product.price %}
-                            <p> ₦{{ _product.price }} - <span class="text-red-600 line-through">₦{{_product.old_price}}</span> <span id="price-off">{{100 - ((_product.price / _product.old_price) * 100)}}</span>% off! </p>
+                            <p> ₦{{ _product.price }} - <span class="text-red-600 line-through">₦{{_product.old_price}}</span> <span class="price-off">{{100 - ((_product.price / _product.old_price) * 100)}}</span>% off! </p>
                         {% else %}
                             <span class="rounded-lg shadow px-2 py-1 bg-green-500 text-green-100">Free</span>
                         {% endif %}
@@ -47,6 +47,9 @@
             </div>
         </div>
     </div>
+
+    <script src="https://apps.elfsight.com/p/platform.js" defer></script>
+    <div class="elfsight-app-71cd6ef2-6f2b-494a-b49f-3793041a32d2"></div>
 </div>
 
 <script>

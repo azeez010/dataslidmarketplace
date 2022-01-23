@@ -1,0 +1,34 @@
+{% extends "./base.html" %}
+{% block title %}Write a Blog{% endblock %}
+{% block content %}
+
+{% if current_user.is_authenticated and current_user.is_admin %} 
+<div class="sm:w-full mt-4 p-4 rounded-lg bg-white shadow">
+    <h1 class="font-bold text-2xl my-2 mb-4">Edit Blog</h1>  
+        <form id="form" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="id" value="{{ blog.id }}">
+            <p class="my-2">Title</p>
+            <input type="text" name="title" placeholder="Title" class="bg-gray-200 p-2 placeholder-gray-400 my-1 w-full" value="{{ blog.title }}">
+            <p class="my-2">Details</p>
+            {{ ckeditor.create(value=blog.description|safe) }}
+            <p class="my-2">Summary</p>
+            <textarea name="summary" class="bg-gray-200 p-2 placeholder-gray-400 my-1 w-full" id="" cols="30" rows="5">{{ blog.summary }}</textarea>
+            <input type="file" name="image" id="">
+            <input id="button" class="px-3 py-2 text-white rounded-lg w-full my-2 bg-gray-900"  type="submit" value="Edit">
+        </form>
+</div>
+
+    <script>
+        $("#form").submit(function(event){
+            $("#button").attr("disabled", true)
+        })
+
+        $("#id_image").attr({"class": "w-full"});
+        $("#id_select_category").attr({"class": "bg-gray-200 p-2 placeholder-gray-400 my-1 w-full"});
+
+        $(".cke_editable cke_editable_themed cke_contents_ltr cke_show_borders").text($("#desc").text())
+</script>
+
+    {% endif %}
+    {{ ckeditor.load() }}
+{% endblock %}

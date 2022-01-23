@@ -1,0 +1,67 @@
+{% extends "./base.html"%}
+{% block title %}Blogs{% endblock %}
+{% block content%}
+<section class="container mx-auto p-6 font-mono">
+    <div class="w-full mb-8 overflow-hidden rounded-lg shadow-lg">
+      <div class="w-full overflow-x-auto">
+        {% for blog in blogs.items %}
+            <div class="flex justify-content align-content bg-white p-2 mx-2 my-2">
+                {% if blog.image %}
+                <div class="flex-shrink">
+                    <img src="{{ blog.image }}" class="w-20 h-20 md:w-24 md:h-24" alt="">
+                </div>
+                {% endif %}
+                <div class="ml-4">
+                    <a class="text-2xl mb-4 font-bold" target="_blank" href="{{ url_for('blog', id=blog.id, title=blog.slug, date=blog.datetime.strftime('%d-%m-%Y') )}}">{{ blog.title }}</a> 
+                    <p class="text-gray-700"><i>{{ blog.summary }}</i></p>
+                </div>
+            </div>
+        {% else %}
+            <div class="flex justify-content align-content bg-white p-2 mx-2 my-2">
+                <p class="text-gray-600"><i>Empty, No Blog for now</i></p>
+            </div>
+        {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+
+    <!-- Pagination Links-->
+    <div class="text-right block my-2">
+        <a href="{{ url_for('blogs', page=blogs.prev_num) }}"
+           class="{% if blogs.page == 1 %} hidden {% else %} border-2 border-red-500 inline-block px-2 py-1 my-2 {% endif %} 
+           ">
+           <!-- prev -->
+            &laquo;
+        </a>
+    <!-- Loop through the number of pages to display a link for each-->
+        {% for page_num in blogs.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+            {% if page_num %}
+    <!-- Check for the active page and set the link to "Active"-->
+                {% if blogs.page == page_num %}
+                <a href="{{ url_for('blogs', page=page_num) }}"
+                   class="bg-red-500 border-2 border-red-500 inline-block text-white px-2 py-1 my-2">
+                    {{ page_num }}
+                </a>
+                {% else %}
+                <a href="{{ url_for('blogs', page=page_num) }}"
+                   class="border-2 border-red-500 inline-block px-2 py-1 my-2">
+                    {{ page_num }}
+                </a>
+                {% endif %}
+            {% else %}
+               <span class="mx-1">...</span>
+            {% endif %}
+        {% endfor %}
+        <a href="{{ url_for('blogs', page=blogs.next_num) }}"
+           class="{% if blogs.page == blogs.pages %} hidden {% else %} border-2 border-red-500 inline-block px-2 py-1 my-2 {% endif %}">
+           <!-- next  -->
+           &raquo;
+        </a>
+    </div>
+
+  </section>
+
+{% endblock %}

@@ -1,5 +1,5 @@
-import uuid
-from models import User,ProductAuth, app, db
+import uuid, random
+from models import ProductAuth, db
 from random import randrange
 from botocore.exceptions import ClientError
 import boto3, os
@@ -116,6 +116,32 @@ def delete_image(Key):
         # delete object
         conn.delete_object(Bucket=storage_bucket, Key=Key)
 
+def upload_blog_image(model, obj_key, image):
+    if image:
+        # Connect with credentials
+        storage_key = os.environ.get("aws_key")
+        storage_secret = os.environ.get("aws_secret")
+        storage_bucket = "myturkeyapp"
+
+        conn = boto3.client(
+            's3',
+            aws_access_key_id=storage_key,
+            aws_secret_access_key=storage_secret
+            )
+
+        key_salt = random.randrange(0, 100000)
+
+        filename = image.filename
+        Key = f'{obj_key}/{filename}-{key_salt}'
+        conn.upload_fileobj(image, storage_bucket, Key)
+
+        image_url = f"https://myturkeyapp.s3.amazonaws.com/{Key}"
+        model.image = image_url
+        model.image_key = Key
+        return image_url
+    return None
+
+
 def upload_image(model, image, upload_type):
     if image:
         # Connect with credentials
@@ -137,7 +163,6 @@ def upload_image(model, image, upload_type):
 
         upload_url = f"https://{storage_bucket}.s3.amazonaws.com/{Key}"
         
-        print(upload_type)
         # elif upload_type == "thumbnail":
         #     model.image = upload_url
         #     model.image_key = Key

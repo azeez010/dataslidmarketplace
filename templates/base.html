@@ -14,7 +14,27 @@
     <meta name='theme-color' content="rgb(243, 176, 176)">
 <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
     {% block head %}{% endblock %}
-    <title>{% block title %}{% endblock %}</title>
+    <title>Helpbotics - One stop for all you automation solutions {% block title %}{% endblock %}</title>
+    <!-- SEO Config -->
+    <meta name='robots' content='max-image-preview:large' />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Number one platform for amazing automation softwares that solves important problems."/>
+    <link rel="canonical" href="https://helpbotics.com/" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Helpbotics - One stop for all you automation solutions" />
+    <meta property="og:description" content="Number one platform for amazing automation softwares that solves important problems." />
+    <meta property="og:url" content="https://helpbotics.com/" />
+    <meta property="og:site_name" content="Helpbotics - One stop for all you automation solutions" />
+    <meta property="og:image" content="https://helpbotics.com/static/mob_bot.jpg" />
+    <meta property="og:image:secure_url" content="https://helpbotics.com/static/mob_bot.jpg" />
+    <meta property="og:image:width" content="465" />
+    <meta property="og:image:height" content="297" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:description" content="Number one platform for amazing automation softwares that solves important problems." />
+    <meta name="twitter:title" content="Helpbotics - One stop for all you automation solutions" />
+    <meta name="twitter:image" content="https://helpbotics.com/static/mob_bot.jpg" /> 
+    
 </head>
 <style>
     .hero-title{
@@ -182,13 +202,16 @@
                                 <span class="rounded-3xl h-4 w-4 bg-red-500 text-md text-white py-1 px-2 z-20 cart_number">0</span>
                             </div>
                             {% if current_user.is_authenticated %}
-                                <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('home')}}">Home</a>      
+                                <!-- <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('home')}}">Home</a>     -->
+                                  
                                 <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('market')}}">Market</a>     
-                                <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('my_downloads')}}">My downloads</a>     
+                                <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('services')}}">Services</a>  
+                                <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('blogs')}}">Blog</a>
+                                <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('my_downloads')}}">Downloads</a>     
                                 {% if current_user.is_authenticated %}
                                 {% if current_user.is_admin %}
                                     <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('add_items')}}">Add Items</a>
-                                    <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('admin_settings')}}">Admin tab</a>
+                                    <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('admin_settings')}}">Admin</a>
                                     {% endif %}
                                     <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('logout')}}">logout</a>
                                     {% endif %}
@@ -242,7 +265,9 @@
                     <button id="joinBtn" class="bg-yellow-500 joinBtn p-2 text-white w-full rounded-lg">Join now!</button>    
                 </div>
                 <p class="my-2 mb-4 md:mb-6 text-md md:text-xl text-white font-semibold ">HOTLINKS</p>
-                <a href="http://www.africonn.com" target="_blank" class="text-gray-200 text-md md:text-xl my-2 md:my-4">www.africonn.com</a><br>
+                <a href="http://africonn.pythonanywhere/com" target="_blank" class="text-gray-200 text-md md:text-xl my-2 md:my-4">www.africonn.com</a><br>
+                <br>
+                <p><a class="text-gray-200 text-md md:text-xl my-2 md:my-4" href="/services">Services</a></p>
                 <p class="text-gray-200 text-md md:text-xl my-2 md:my-4">
                     Dataslid digitals, Mokola, Ibadan
                 </p>

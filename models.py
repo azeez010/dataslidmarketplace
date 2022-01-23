@@ -206,6 +206,21 @@ class ProductAuth(db.Model):
     product  = db.relationship(Products, backref='Productproducts', lazy=True)
     product_id = db.Column(db.Integer(), db.ForeignKey(Products.id))
     
+class Blog(db.Model):
+    __tablename__ = 'blog'
+    id = db.Column(db.Integer, primary_key=True)
+    user  = db.relationship(User, backref='blog', lazy=True)
+    user_id = db.Column(db.Integer(), db.ForeignKey(User.id))
+    title = db.Column(db.String(2000))
+    slug = db.Column(db.String(2000))
+    description = db.Column(db.Text)
+    summary = db.Column(db.Text)
+    datetime = db.Column(db.DateTime)  
+    image = db.Column(db.String(1000))
+    image_key = db.Column(db.String(100))
+
+    is_updated = db.Column(db.Boolean, default=False)
+
 
 if __name__ == '__main__':
     manager.run()

@@ -6,7 +6,7 @@ from is_safe_url import is_safe_url
 from flask_humanize import Humanize
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user, current_user
 from forms import MyForm, LoginForm, TestimonyForm 
-from models import ProductAuth, Products, Store, UserProducts, User, EmailSubcribers, Testimonial, app, db, Transaction_Table
+from models import ProductAuth, Blog, Products, Store, UserProducts, User, EmailSubcribers, Testimonial, app, db, Transaction_Table
 from schema import user_schema
 from datetime import datetime
 from pypaystack import Transaction, errors
@@ -299,6 +299,11 @@ def no_route():
     
 @app.route("/home", methods=["GET", "POST"])
 def home():
+    return render_template("home.html")
+
+
+@app.route("/services", methods=["GET", "POST"])
+def services():
     return render_template("dataslid/index.html")
 
 @app.route("/marketplace", methods=["GET"])
@@ -594,6 +599,47 @@ def admin_settings():
     
     return render_template("admin_settings.html", email=email, users=users, no_users=no_users, no_emails=no_emails)
 
+@app.route("/sitemap")
+@app.route("/sitemap/")
+@app.route("/sitemap.xml")
+def sitemap():
+    """
+        Route to dynamically generate a sitemap of your website/application.
+        lastmod and priority tags omitted on static pages.
+        lastmod included on dynamic content such as blog posts.
+    """
+    from flask import make_response, request, render_template
+    import datetime
+    from urllib.parse import urlparse
+
+    host_components = urlparse(request.host_url)
+    host_base = host_components.scheme + "://" + host_components.netloc
+
+    # Static routes with static content
+    static_urls = list()
+    for rule in app.url_map.iter_rules():
+        if not str(rule).startswith("/admin") and not str(rule).startswith("/user"):
+            if "GET" in rule.methods and len(rule.arguments) == 0:
+                url = {
+                    "loc": f"{host_base}{str(rule)}"
+                }
+                static_urls.append(url)
+
+    # Dynamic routes with dynamic content
+    dynamic_urls = list()
+    blog_posts = Blog.query.all()
+    for post in blog_posts:
+        url = {
+            "loc": f"{host_base}/blog?id={post.id}&title={post.title}",
+            # "lastmod": post.date_published.strftime("%Y-%m-%dT%H:%M:%SZ")
+            }
+        dynamic_urls.append(url)
+
+    xml_sitemap = render_template("sitemap.xml", static_urls=static_urls, dynamic_urls=dynamic_urls, host_base=host_base)
+    response = make_response(xml_sitemap)
+    response.headers["Content-Type"] = "application/xml"
+
+    return response
 if __name__  == '__main__':
     db.create_all()
     PORT = os.environ.get("PORT")
