@@ -41,7 +41,8 @@ def push_email(recipient, subject, message):
             <p style="font-size: 16px">{message}</p>
             <br>
             <br>
-            <a href="dataslid.pythonanywhere.com">Courtey of Dataslid tech </a>
+            <a href="https://helpbotics.com/unsubscribe-to-mail">Unsubscribe for Newsletter</a>
+            <a href="https://helpbotics.com/services">Courtey of Dataslid tech </a>
         </div>
     </body>
     </html>

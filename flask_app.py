@@ -156,6 +156,7 @@ def paystack():
         email = request.form.get('email')
     data = request.form.get("data")
     load_data = json.loads(data)
+    print(load_data)
     
     bot_price = 0 
     for i in load_data:
@@ -163,11 +164,10 @@ def paystack():
 
     # turn to naira from kobo
     bot_price *= 100
-    print(f"{bot_price=}")
-    metadata = {
-        "currency": "NGN",
-        "amount": bot_price
-    }
+    # metadata = {
+    #     "currency": "NGN",
+    #     "amount": bot_price
+    # }
     # bot_price = 25000 * 100
     #Instantiate the transaction object to handle transactions.  
     #Pass in your authorization key - if not set as environment variable PAYSTACK_AUTHORIZATION_KEY
@@ -187,7 +187,7 @@ def paystack():
     #     else:
     #  metadata=metadata NGN
     init_transaction = transaction.initialize(email, bot_price, "NGN")
-    print(init_transaction)
+    # print(init_transaction)
     reference = init_transaction[3].get('reference')
     transaction = Transaction_Table(ref_no=reference, product_data=data)
     db.session.add(transaction)
@@ -593,8 +593,7 @@ def email_subscribers():
             db.session.commit()
         
         send_mail("Thanks for joining our Newsletter", f"We really appreciate you joining our news letter and we promise to bless your e-mail account with good contents.", email)
-        send_mail("Someone joined the newsletters", f"{email} just joined us at Dataslid tech,
-         Total number = {total_emails}", "azeezolabode010@gmail.com")
+        send_mail("Someone joined the newsletters", f"{email} just joined us at Dataslid tech, Total number = {total_emails}", "azeezolabode010@gmail.com")
         return dict(msg="success", ok=True)
     else:
         return dict(msg="Failed", ok="Failed")
