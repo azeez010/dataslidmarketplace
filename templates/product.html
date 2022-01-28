@@ -48,6 +48,11 @@
                                 <button type="free" bool=""  btn_id="{{ product.id}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md" >Free</button>
                             {% endif %}
                         {% else %}
+                        {% if current_user.is_authenticated %}
+                            <div class="inline-block"><form id="buyNow" action="/paystack" method="post"><input type="hidden" name="data" id="data"><button class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Buy Now</button></form></div>
+                        {% else %}
+                            <button id="buyNow" class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Buy Now</button>
+                        {% endif %}
                             <button type="pay" bool="" btn_id="{{ product.id}}" data="{{ product.title}}?{{ product.price}}?{{ product.id}}?{{ product.thumbnail}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md" id="buy" >buy</button>
                             {% if product.demo_link %}
                                 <a href="{{product.demo_link}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md">Demo</a>
@@ -103,7 +108,6 @@
     $("#buy").click(function(){
         let bool = $(this).attr("bool")
         if(!bool){
-            console.log("buy")
             let price, title, type, _id;
             let get_cart = localStorage.getItem("cart")
             if(!get_cart) {
@@ -163,6 +167,37 @@
         // }
     })
     
+    let cartPopup = (message) => {
+        $("section").prepend(
+            // <div id="popup" class="z-100 flex h-screen w-full absolute bg-gray-200 popup-style items-center justify-center ">
+            ` <div id="cartPopup" class="bg-green-500 rounded-xl p-2 float-right mr-2 border-2">
+                    <div class="flex">
+                        <p class="text-md text-white">${message}</p>
+                        <span id="closeCartPopup" class="cursor-pointer text-2xl text-red-600 -mt-1 ml-4 ">&times;</span>
+                    </div>
+                </div>
+                `
+        )
+
+
+
+        let closePopupBtn = document.getElementById("closeCartPopup")
+        closePopupBtn.addEventListener("click", closeCartPopup)
+        let int = 2
+        let intervalId = setInterval(() => {
+            $("#cartPopup").addClass(`opacity-${int * 10 }`)
+            if(int == 0){
+                clearInterval(intervalId)
+                $("#cartPopup").remove()
+            } 
+            $("#cartPopup").removeClass(`opacity-${int * 10 }`)
+            int--
+        }, 1000);
+    
+    
+    }
+
+
 
     // $(".buy").each(function(index){
     //     $(this).click(function(){
@@ -229,5 +264,125 @@
     //     })    
     // }
 
+    $("#buyNow").click(function(){
+        window.location.href = "/signup?next=/product/{{ product.id }}"    
+        // promptPopup("Enter your e-mail to proceed")
+    })
+
+    let promptPopup = (subject) => {
+        $("body").prepend(
+            `<div id="popup" class="z-100 flex h-screen w-full absolute  bg-gray-200 popup-style items-center justify-center ">
+                <div class="bg-white rounded-xl opacity-100 p-2 m-2 mx-4">
+                    <span id="closePopup" class="cursor-pointer text-2xl text-red-600 float-right">&times;</span>
+                    <div class="ml-2">
+                        <p class="font-bold mb-2 text-lg">${subject}</p>
+                        <input class="w-full px-2 py-1 my-1 border-2 border-gray-900" id="promptBox" placeholder="Enter your email" type="email" required/>
+                        
+                        <div class="float-right mt-3">
+                            <button class="border-2 border-gray-500 rounded-md px-2 py-1 hover:bg-gray-100 text-gray-700 text-sm mr-1" id="cancelBtn">Cancel</button>
+                            <button class="border-2 border-red-500 bg-red-500 text-white rounded-md px-2 py-1 hover:bg-red-600 text-sm mr-1" id="confirmPrompt">Ok</button>
+                            </div>
+                            </div>
+                            </div>
+                            </div>
+                            `
+                            )
+                            
+                            $("#cancelBtn").click(function(){
+                                closePopup()    
+                            })
+                            
+                            let closePopupBtn = document.getElementById("closePopup")
+                            closePopupBtn.addEventListener("click", closePopup)
+                            popupCloser()
+                            
+                            function validateEmail(email) {
+                                if(!email) return false
+                                const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                                return re.test(String(email).toLowerCase());
+                            }
+                            
+                            let emailListFunc = async (emailId) => {
+                                let email = $(emailId).val()
+                                let emailTest = validateEmail(email)
+                                if(!emailTest){
+                                    errorPopup("Email is empty or not valid")
+                                    return
+                                }
+
+                                const join_list = await fetch('/subscribe-to-mail', {
+                                    method: 'POST',
+                                    headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({email})
+                                });
+                                const listResponse = await join_list.json();
+                                
+                                $("#emailInput").val("")
+                                
+                                if(listResponse.ok){
+                                    successPopup()
+                                    localStorage.setItem("subscribed", true)
+                                }
+                                    
+                            }
+
+                            $("#confirmPrompt").click(function(){
+                                // let email = promptPopup("Confirm")
+                                let email = $("#promptBox").val()
+                                let isValid = validateEmail(email)
+                                if(isValid){
+                                    emailListFunc("#promptBox")
+                                    // insertObjectToCart()
+                                    // let _data = localStorage.getItem("cart");
+                                    // window.location.href = `/paystack?email=${email}&data=${_data}`
+                                    // closePopup();
+                                } 
+                                else {
+                                    alert("Invalid E-mail")
+                                }
+                            })
+                        }
+                        
+    let closePopup = () => {
+    $("#popup").remove()
+}
+
+    function popupCloser(){
+        let popupDiv = document.getElementById("popup")
+        window.onclick = function(event) {
+            if (event.target == popupDiv) {
+                popupDiv.style.display = "none";
+            }
+        }
+    }
+
+
+    $("#buyNow").submit(function(e){
+        insertObjectToCart()
+        let _data = localStorage.getItem("cart");
+        $("#data").val(_data)
+    })
+
+    function insertObjectToCart(){
+        let get_cart = []
+        let price, title, type, _id;
+        let info  ="{{ product.title}}?{{ product.price}}?{{ product.id}}?{{ product.thumbnail}}"
+        info = info.split("?")
+        title = info[0];
+        price = info[1];
+        _id = info[2];
+        thumbnail = info[3];
+        let data = {'id': _id, "type": type, "price": price, "title": title, "thumbnail": thumbnail}
+        get_cart.push(data)
+
+
+        cartPopup(`{{ product.title }} Cart added`)
+        // $("#cart_number").text(get_cart.length)
+        localStorage.setItem("cart", JSON.stringify(get_cart))
+        updateCartNumber()
+    }
 </script>
 {% endblock %}

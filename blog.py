@@ -1,5 +1,5 @@
 from datetime import datetime
-from utils import upload_image, upload_blog_image
+from utils import get_two_random_number, upload_blog_image
 from models import Blog, app, db
 from flask import request, redirect, flash, url_for, render_template
 from flask_login import login_required, current_user
@@ -13,7 +13,12 @@ app.config['CKEDITOR_PKG_TYPE'] = 'full-all'
 def blog():
     id = request.args.get('id')
     blog = Blog.query.filter_by(id=id).first()
-    return render_template("blog/blog.html", blog=blog)
+    # Slice Data out
+    blogs = Blog.query.filter(Blog.id != blog.id).all()
+    start, end = get_two_random_number(len(blogs))
+    read_more = blogs[start:end]
+    return render_template("blog/blog.html", blog=blog, read_more=read_more)
+    
 
 @app.route("/blogs", methods=["GET"])
 def blogs():

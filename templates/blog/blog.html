@@ -27,13 +27,29 @@
         
         <div class="my-4">
             {% if blog.image %}
-                <img src="{{ blog.image }}" alt="{{ blog.title }}">
+                <img src="{{ blog.image }}" style="width: 60%; margin: auto;" alt="{{ blog.title }}">
             {% endif %}
         </div>
     
         <br>
         {{ blog.description|safe }}
-    
+        <br>
+        {% if read_more %}
+            <p class="text-xl font-bold">Read More</p>
+            {% for blog in read_more %}
+                <div class="grid turkey-blog justify-content align-content bg-white p-2 mx-2 my-2">
+                    {% if blog.image %}
+                        <div class="flex-shrink">
+                            <img src="{{ blog.image }}" class="w-full" alt="{{ blog.title }}">
+                        </div>
+                    {% endif %}
+                    <div class="ml-4">
+                        <a class="text-2xl mb-4 mt-2 leading-8 font-semibold" target="_blank" href="{{ url_for('blog', id=blog.id, title=blog.slug )}}">{{ blog.title }}</a> 
+                        <p class="text-gray-700 mt-2"><i>{{ blog.summary }}</i></p>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
     </div>
 </div>
 {% endblock %}

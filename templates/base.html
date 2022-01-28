@@ -53,13 +53,7 @@
     .xxl{
         border-radius: 25px;
     }
-    /* .grid{
-        display: grid;
-        grid-template-columns: 4fr 8fr;
-    }
-    .ungrid{
-        display: grid;
-        grid-template-columns: 5fr 4fr; } */
+
     .mheight{
         min-height: 80vh;
     }
@@ -155,6 +149,31 @@
  background-color: rgba(0, 0, 0, .9);  
  position: fixed; 
 }
+
+.turkey-signup {
+        grid-template-columns: 1fr 4fr
+    }
+
+@media only screen and (min-width: 500px) {
+    .turkey-blog {
+        grid-template-columns: 1fr 4fr
+    }
+}
+
+
+@media only screen and (min-width: 1000px) {
+    .turkey-grid-rows {
+        grid-template-columns: 2fr 6fr 2fr;
+    }
+    .turkey-blog {
+        grid-template-columns: 1fr 4fr
+    }
+    .hide-mobile{
+        display: none;
+    }
+
+}
+
 </style>
 <body class="bg-gray-100 dark:bg-gray-800">
     <div class="w-full bg-gray-900 mb-4 flexnav  pt-2 pb-1 md:py-2 shadow  top-0 sticky z-20 px-2 md:px-4">
@@ -206,7 +225,7 @@
                                   
                                 <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('market')}}">Market</a>     
                                 <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('services')}}">Services</a>  
-                                <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('blogs')}}">Blog</a>
+                                <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('blogs')}}">Blog</a>  
                                 <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('my_downloads')}}">Downloads</a>     
                                 {% if current_user.is_authenticated %}
                                 {% if current_user.is_admin %}
@@ -218,7 +237,9 @@
                             {% else %}
                             
                             <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('home')}}">Home</a>                
-                            <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('market')}}">Market</a>             
+                            <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('market')}}">Market</a>         
+                            <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('services')}}">Services</a>  
+                                <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('blogs')}}">Blog</a>    
                             {% if current_user.is_authenticated %}
                             {% if current_user.is_admin %}
                                         <a class="md:mx-0 text-blue-300 text-lg md:text-lg sm:center sm:px-1 sm:py-2 font-normal block md:inline" href="{{url_for('admin_settings')}}">Admin tab</a>
@@ -243,18 +264,6 @@
                 {% endif %}
             {% endwith%}
             {% block content %}{% endblock %}
-            {% if current_user.is_admin %}
-                <p class="text-red-500 text-center text-xl mb-3"><u>Admin Only Stats</u></p>
-                    <!-- BEGIN: Powered by Supercounters.com -->
-                    <center><script type="text/javascript" src="//widget.supercounters.com/ssl/online_i.js"></script><script type="text/javascript">sc_online_i(1000,"ffffff","e61c1c");</script><br><noscript><a href="https://www.supercounters.com/">free online counter</a></noscript>
-                    </center>
-                    <!-- END: Powered by Supercounters.com -->
-
-                    <!-- BEGIN: Powered by Supercounters.com -->
-                <center><script type="text/javascript" src="//widget.supercounters.com/ssl/flag.js"></script><script type="text/javascript">sc_flag(1000  ,"FFFFFF","000000","cccccc",2,10,0,0)</script><br><noscript><a href="http://www.supercounters.com/">Flag Counter</a></noscript>
-                </center>
-                <!-- END: Powered by Supercounters.com -->
-            {% endif %}
         </section>
         <div class="relative sm:py-2 md:py-4 sm:px-8 md:px-16 sm:block flexI sm:block md:flex bg-gray-900 -z-30 rounded-tl-xl rounded-tr-xl">
             <div class="ml-2 md:ml-4 py-2 md:py-4">
@@ -286,7 +295,7 @@
         if(!popupSubscribed){
             if(!popupInterval) popup()
     
-            popupInterval ?? localStorage.setItem("popup_interval", 20)
+            popupInterval ?? localStorage.setItem("popup_interval", 10)
     
             popupInterval = Number(localStorage.getItem("popup_interval"))
     
@@ -355,40 +364,7 @@
         popupCloser()
     }
 
-    let cartPopup = (message) => {
-        $("section").prepend(
-            // <div id="popup" class="z-100 flex h-screen w-full absolute bg-gray-200 popup-style items-center justify-center ">
-            ` <div id="cartPopup" class="bg-green-500 rounded-xl p-2 float-right mr-2 border-2">
-                    <div class="flex">
-                        <p class="text-md text-white">${message}</p>
-                        <span id="closeCartPopup" class="cursor-pointer text-2xl text-red-600 -mt-1 ml-4 ">&times;</span>
-                    </div>
-                </div>
-                `
-        )
-
-
-        let closeCartPopup = () => {
-            $("#cartPopup").remove()
-        }
-
-        let closePopupBtn = document.getElementById("closeCartPopup")
-        closePopupBtn.addEventListener("click", closeCartPopup)
-        let int = 2
-        let intervalId = setInterval(() => {
-            $("#cartPopup").addClass(`opacity-${int * 10 }`)
-            if(int == 0){
-                clearInterval(intervalId)
-                $("#cartPopup").remove()
-            } 
-            $("#cartPopup").removeClass(`opacity-${int * 10 }`)
-            int--
-        }, 1000);
     
-    
-    }
-
-
 
 
     let time = 1000 //In millisec

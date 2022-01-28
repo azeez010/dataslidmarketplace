@@ -2,7 +2,7 @@ import uuid, random
 from models import ProductAuth, db
 from random import randrange
 from botocore.exceptions import ClientError
-import boto3, os
+import boto3, os, re
 from random import randint
 
 
@@ -207,3 +207,32 @@ def create_product_key(product_id):
     db.session.commit()
     
     return dict(success=True, message="Key created"), 200
+
+def get_two_random_number(len_of_products):
+    product_len = len_of_products
+    slice_range = 4
+    end = randint(0, product_len)
+    
+    if slice_range > end:
+        end += slice_range
+        
+        if product_len < slice_range:
+            slice_range = product_len 
+
+        if end > product_len:
+            diff = end - product_len 
+            end -= diff
+
+        
+    start = end - slice_range
+    return start, end
+
+  
+  
+def validate_email(email):   
+    regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'  
+  
+    if(re.search(regex,email)):   
+       return True 
+    else:
+        return False   

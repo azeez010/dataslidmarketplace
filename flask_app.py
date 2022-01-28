@@ -12,7 +12,7 @@ from datetime import datetime
 from pypaystack import Transaction, errors
 from pypaystack import utils as pay_utils
 
-from utils import upload_image, send_mail, get_two_random_number, create_product_key
+from utils import upload_image, send_mail, get_two_random_number, create_product_key, validate_email
 from helper import generate_recommendation
 from settings import PAYSTACK_SECRET
 # For import all file basic_auth at once
@@ -150,11 +150,11 @@ def paystack():
     if not current_user:
         return redirect(url_for('login'))
 
-    # print(dir(request))
-    email = current_user.email
-    
-    # print(request.args)
-    data = request.args.get("data")
+    if current_user.is_authenticated:
+        email = current_user.email
+    else:
+        email = request.form.get('email')
+    data = request.form.get("data")
     load_data = json.loads(data)
     
     bot_price = 0 
@@ -295,11 +295,11 @@ def add_items():
 # Redirect / to home
 @app.route("/", methods=["GET"])
 def no_route():
-    return redirect(url_for("home"))
+    return redirect(url_for("marketplace"))
     
 @app.route("/home", methods=["GET", "POST"])
 def home():
-    return render_template("home.html")
+    return redirect(url_for("marketplace"))
 
 
 @app.route("/services", methods=["GET", "POST"])
@@ -541,27 +541,38 @@ def login():
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
+    next_page = request.args.get("next")
+       
     if current_user.is_authenticated:
         return redirect(url_for('market'))
     
     form = MyForm()
     if request.method == "POST" and form.validate_on_submit():
+        next_page = request.args.get("next")
+        
         password = form.password.data
         email = form.email.data
         password = md5_crypt.hash(password)
         check_for_first_user = len(User.query.all())
         user = User(email=email, password=password)
-        # If first make them admin
+        
         if not check_for_first_user:
             user.is_admin = True
         
         db.session.add(user)
         db.session.commit()
         
+        user = User.query.filter_by(email=email).first()
+        login_user(user)
+        is_safe_url(next_page, request.url)
+        if is_safe_url(next_page, request.url):
+            return redirect(next_page)
+        return redirect("/market")
+
         # Initialize the store table
-        store = Store(user_id=user.id)
-        db.session.add(store)
-        db.session.commit()
+        # store = Store(user_id=user.id)
+        # db.session.add(store)
+        # db.session.commit()
       
         flash("You have signed up successfully")    
         return redirect('/login')
@@ -571,16 +582,32 @@ def signup():
 @app.route("/subscribe-to-mail", methods=["GET", "POST"])
 def email_subscribers():
     email = request.json.get("email")
-    email_exists = EmailSubcribers.query.filter_by(email=email).first()
-    total_emails = len(email_exists)
-    
-    if not email_exists:
-        email_subscribers = EmailSubcribers(email=email)
-        db.session.add(email_subscribers)
-        db.session.commit()
-    
-    send_mail("Someone joined the newsletters", f"{email} just joined us at Dataslid tech, Total number = {total_emails}", "azeezolabode010@gmail.com")
-    return dict(msg="success", ok=True)
+    is_valid = validate_email(email)
+    if is_valid:
+        email_exists = EmailSubcribers.query.filter_by(email=email).first()
+        total_emails = len(email_exists)
+        
+        if not email_exists:
+            email_subscribers = EmailSubcribers(email=email)
+            db.session.add(email_subscribers)
+            db.session.commit()
+        
+        send_mail("Thanks for joining our Newsletter", f"We really appreciate you joining our news letter and we promise to bless your e-mail account with good contents.", email)
+        send_mail("Someone joined the newsletters", f"{email} just joined us at Dataslid tech,
+         Total number = {total_emails}", "azeezolabode010@gmail.com")
+        return dict(msg="success", ok=True)
+    else:
+        return dict(msg="Failed", ok="Failed")
+
+
+@app.route("/unsubscribe-to-mail", methods=["GET", "POST"])
+def email_unsubscribe():
+    _email = request.args.get("email")
+    email = EmailSubcribers.query.filter_by(email=_email).first()
+    email.delete()
+    db.commit.session()
+    flash("You have successful opt-out of our amazing newsletter")
+    return redirect(url_for("login"))
 
 
 
@@ -630,8 +657,7 @@ def sitemap():
     blog_posts = Blog.query.all()
     for post in blog_posts:
         url = {
-            "loc": f"{host_base}/blog?id={post.id}&title={post.title}",
-            # "lastmod": post.date_published.strftime("%Y-%m-%dT%H:%M:%SZ")
+            "loc": f"{host_base}/blog?id={post.id}&amp;title={post.title}",
             }
         dynamic_urls.append(url)
 
@@ -640,6 +666,7 @@ def sitemap():
     response.headers["Content-Type"] = "application/xml"
 
     return response
+    
 if __name__  == '__main__':
     db.create_all()
     PORT = os.environ.get("PORT")
