@@ -35,13 +35,12 @@ def push_email(recipient, subject, message):
     # The HTML body of the email.
     BODY_HTML = f"""<html>
     <head></head>
-    <body style="background-color: #ccc; padding: 8px ">
-        <div style="background-color: #fff">
-            <h1>{subject}</h1>
-            <p style="font-size: 16px">{message}</p>
+    <body style="padding: 8px ">
+        <div style="margin: 5px">
+            <p style="font-size: 14px">{message}</p>
             <br>
             <br>
-            <a href="https://helpbotics.com/unsubscribe-to-mail">Unsubscribe for Newsletter</a>
+            <a href="https://helpbotics.com/unsubscribe-to-mail?email={RECIPIENT}">Unsubscribe from Newsletter</a>
             <a href="https://helpbotics.com/services">Courtey of Dataslid tech </a>
         </div>
     </body>

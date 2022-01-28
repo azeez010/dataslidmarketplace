@@ -203,7 +203,7 @@ class ProductAuth(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     key = db.Column(db.String(200))
     used = db.Column(db.Boolean, default=False)
-    product  = db.relationship(Products, backref='Productproducts', lazy=True)
+    product  = db.relationship(Products, backref='product_auth', lazy=True)
     product_id = db.Column(db.Integer(), db.ForeignKey(Products.id))
     
 class Blog(db.Model):

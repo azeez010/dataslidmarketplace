@@ -93,7 +93,6 @@ def paycallback():
             amount = data["data"].get('amount')
             email = data["data"].get('customer').get('email')
             cus_code = data["data"].get('customer').get('customer_code')
-            paid_at = data["data"].get('paidAt')
             auth_code = data["data"].get('authorization').get('authorization_code')
             paid_time = datetime.now()
             get_transaction = Transaction_Table.query.filter_by(ref_no=reference).first()
@@ -116,7 +115,7 @@ def paycallback():
                 user_product = UserProducts(user_id=update_user.id, product_id=product_id)
                 db.session.add(user_product)
                 # Create product key
-                create_product_key(_product_id)
+                create_product_key(product_id)
 
             get_transaction.transaction_complete = True
             db.session.commit()
@@ -585,15 +584,14 @@ def email_subscribers():
     is_valid = validate_email(email)
     if is_valid:
         email_exists = EmailSubcribers.query.filter_by(email=email).first()
-        total_emails = len(email_exists)
-        
+    
         if not email_exists:
             email_subscribers = EmailSubcribers(email=email)
             db.session.add(email_subscribers)
             db.session.commit()
         
-        send_mail("Thanks for joining our Newsletter", f"We really appreciate you joining our news letter and we promise to bless your e-mail account with good contents.", email)
-        send_mail("Someone joined the newsletters", f"{email} just joined us at Dataslid tech, Total number = {total_emails}", "azeezolabode010@gmail.com")
+        send_mail("Thanks for joining our Newsletter", "We really appreciate you joining our news letter and we promise to bless your e-mail account with good contents.", email)
+        send_mail("Someone joined the newsletters", f"{email} just joined us at Dataslid tech", "azeezolabode010@gmail.com")
         return dict(msg="success", ok=True)
     else:
         return dict(msg="Failed", ok="Failed")
@@ -603,9 +601,12 @@ def email_subscribers():
 def email_unsubscribe():
     _email = request.args.get("email")
     email = EmailSubcribers.query.filter_by(email=_email).first()
-    email.delete()
-    db.commit.session()
-    flash("You have successful opt-out of our amazing newsletter")
+    if email:
+        email.delete()
+        db.commit.session()
+        flash("You have successful opt-out of our amazing newsletter")
+    else:
+        flash("Email doesn't exist")
     return redirect(url_for("login"))
 
 

@@ -39,7 +39,7 @@
                     Total price - <span id="tot_price">₦${total_price}</span>
                     <br />
                     <br />
-                    ${!total_price ? '<button class="text-white bg-yellow-500 px-2 py-1 rounded-md">Get for free</button>' : '<form id="buy" action="/paystack"><input type="hidden" name="data" id="data"><button class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Proceed to Checkout</button></form>'}  
+                    ${!total_price ? '<button class="text-white bg-yellow-500 px-2 py-1 rounded-md">Get for free</button>' : '<form id="buy" method="post" action="/paystack"><input type="hidden" name="data" id="data"><button class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Proceed to Checkout</button></form>'}  
                 </div>                    
             `
 
