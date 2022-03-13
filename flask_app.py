@@ -86,9 +86,8 @@ class MyTransaction(Transaction):
 def git_update():
     repo = git.Repo('./market')
     origin = repo.remotes.origin
-    # repo.create_head('master',
-    # origin.refs.master).set_tracking_branch(origin.refs.master).checkout()
-    repo.heads.master.set_tracking_branch(origin.refs.master)
+    repo.create_head('master',
+    origin.refs.master).set_tracking_branch(origin.refs.master).checkout()
     origin.pull()
     return '', 200
 

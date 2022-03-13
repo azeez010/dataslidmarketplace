@@ -27,7 +27,7 @@
         </select>
 
         <div id="affliate_input" {% if not product.accept_affliate %} class="hidden" {% endif %}>
-            <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="affliate_commission" type="number" min="0" max="100" placeholder="Enter affliate commission" required id="affliate_commission" value="{% if product.affliate_commission %}{{ product.affliate_commission }}{% endif %}"><br>
+            <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="affliate_commission" type="number" min="0" max="100" placeholder="Enter affliate commission" id="affliate_commission" value="{% if product.affliate_commission %}{{ product.affliate_commission }}{% endif %}"><br>
         </div>
 
         <select name="product_type" id="product_type" class="border-2 border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2" id="" required>

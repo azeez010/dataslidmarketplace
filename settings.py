@@ -1,4 +1,4 @@
-import geoip2.database
+# import geoip2.database
 from os import getenv, path
 
 ENV = getenv("env")
