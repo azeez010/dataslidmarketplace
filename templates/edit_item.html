@@ -4,33 +4,58 @@
 
 <div class="bg-gray-200 py-2 h-full px-2 md:px-24 mheight">
        <p class="text-2xl">Welcome {{ current_user.username }}</p> 
-    <form method="post" enctype="multipart/form-data">
-        <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " type="search" value="{% if product.title %}{{ product.title }}{% endif %}" placeholder="Product's title" name="title" id="search"><br>
-        <textarea id="mail_messages" placeholder="Product's description"
-         class="rounded-lg bg-white w-full md:w-1/3 border-2 py-1 px-1 md:border-gray-500 md:h-32 sm:h-16 md:py-2 sm:py-2 "  id="" name="description" cols="30" rows="5">{% if product.description %}{{ product.description }}{% endif %}</textarea><br>
+    <form id="postForm" method="post" enctype="multipart/form-data">
+        <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 "  placeholder="Product's title" name="title" value="{% if product.title %}{{ product.title }}{% endif %}"><br>
+        {{ ckeditor.create(value=product.description|safe) }}
         
-        <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " name="old_price" type="text" value="{% if product.old_price %}{{ product.old_price }}{% endif %}" placeholder="Old price" id="subject"><br>
-        <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " name="new_price" type="text" placeholder="New price" value="{% if product.price %}{{ product.price }}{% endif %}" id=""><br>
-        <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " name="youtube_link" type="text" placeholder="youtube link" value="{% if product.youtube_link %}{{ product.youtube_link }}{% endif %}" id=""><br>
+        <input value="{% if product.price %}{{ product.price }}{% endif %}" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="old_price" type="text" placeholder="Old price" id="subject"><br>
+        <input value="{% if product.old_price %}{{ product.old_price }}{% endif %}" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="new_price" type="text" placeholder="New price" id=""><br>
         
         <p>Support group</p>
-        <input type="text" name="support_link" id="" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " type="text" placeholder="Support link"  value="{% if product.support_link %}{{ product.support_link }}{% endif %}">
+        <input type="text" name="support_link" id="" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " type="text" placeholder="Support link"  value="{% if product.support_link %}{{ product.support_link }}{% endif %}">
         
-        <div>
-            <p>Upload the soft product's demo (optional)</p>
-            <input type="file" name="demo_product" id="" value="{% if product.demo_link %}{{ product.demo_link }}{% endif %}" >
-        </div>
-        <div>
-            <p>Upload the soft product</p>
-            <input type="file" name="product" id="" value="{% if product.product_link %}{{ product.product_link }}{% endif %}">
-        </div>
-        <br>
+        
         <div id="photo_div">
             <p>Upload the product image(s)</p>
-            <input type="file" name="picture1" id="" value="{% if product.thumbnail_link %}{{ product.thumbnail_link }}{% endif %}">
+            <input type="file" name="picture1" id="">
+        </div>
+
+        <select name="affliate" id="affliate" class="border-2 border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2" id="" required>
+            <option value="">Do you want to accept affliate</option>
+            <option value="yes" {% if product.accept_affliate %} selected {% endif %}>Yes</option>
+            <option value=""{% if not product.accept_affliate %} selected {% endif %}>No</option>
+        </select>
+
+        <div id="affliate_input" {% if not product.accept_affliate %} class="hidden" {% endif %}>
+            <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="affliate_commission" type="number" min="0" max="100" placeholder="Enter affliate commission" required id="affliate_commission" value="{% if product.affliate_commission %}{{ product.affliate_commission }}{% endif %}"><br>
+        </div>
+
+        <select name="product_type" id="product_type" class="border-2 border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2" id="" required>
+            <option value="">Select the product type</option>
+            <option value="course" {% if product.product_type == "course" %} selected {% endif %} >course</option>
+            <option value="Software" {% if product.product_type == "Software" %} selected {% endif %}>Software</option>
+        </select>
+        
+        <div id="course_container" {% if product.product_type != "course" %} class="hidden" {% endif %}>
+            <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="course_link" type="text" placeholder="course link" id="" value="{% if product.course_link %}{{ product.course_link }}{% endif %}"><br>
+            <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="course_preview_link" type="text" placeholder="course preview link" id="" value="{% if product.course_preview_link %}{{ product.course_preview_link }}{% endif %}"><br>
+        </div>
+        
+        
+        <div id="software_container" {% if product.product_type != "Software" %}  class="hidden" {% endif %} >
+            <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="youtube_link" type="text" placeholder="youtube link" id=""><br>
+            <div>
+                <p>Upload the soft product's demo (optional)</p>
+                <input type="file" name="demo_product" id="">
+            </div>
+            <div>
+                <p>Upload the soft product</p>
+                <input type="file" name="product" id="">
+            </div>
+            <br>
         </div>
         <br>
-        <button id="send_btn" class="bg-gray-500 hover hover:bg-gray-700 shadow-sm:hover text-white p-1 rounded-lg sm:mt-1 md:mt-2 md:py-2 md:px-8 sm:py-2 sm:px-4 sm:text-sm md:text-lg">Edit product</button>
+        <button id="send_btn" class="bg-gray-500 hover hover:bg-gray-700 shadow-sm:hover text-white p-1 rounded-lg sm:mt-1 md:mt-2 md:py-2 md:px-8 sm:py-2 sm:px-4 sm:text-sm md:text-lg w-full">Edit product</button>
     </form>
 
     <button id="add_picture">+ Add Pictures</button>
@@ -85,52 +110,30 @@
 
         document.querySelector("#send_btn").addEventListener("click", mailFunc)
         
-        let loading = document.getElementById("load")
-        let submit = document.getElementById("submit")
-        let results = document.getElementById("results")
-        submit.addEventListener("click", async () =>{
-            let search = document.getElementById("search").value
-            if(search){
-                if((/\s/).test(search)) return alert(`The user's username must not contain space`)
-                loading.innerText = "Loading..."
-                let res = await fetch(`/search-admin?q=${search}`)
-                
-                // submit.setAttribute("disabled", "true")
-                console.log(res)
-                if(res.ok) {
-                    let data = await res.json()
-                    loading.innerText = ""
-                    console.log(data.users)
-                    // for()
-                    while(results.firstChild){
-                        results.removeChild(results.lastChild)
-                    }
-                    if(data.users.length < 1){
-                        loading.innerText = "No user matched"
-                        loading.setAttribute("class", "text-xl py-2 text-red-600")    
-                    }
-                    for(i of data.users){
-                        each_element = document.createElement("div")
-                        each_name = document.createElement("p")
-                        each_email = document.createElement("p")
-                        each_is_paid = document.createElement("p")
-                        each_button = document.createElement("a")
-                        each_name.innerText = i.username
-                        each_name.setAttribute('class', "text-2xl")
-                        each_element.setAttribute('class', "py-2 rounded-lg bg-white my-4 p-4")
-                        each_button.setAttribute('href', `/manage-user?id=${i.id}`)
-                        each_button.setAttribute("class", "text-xl py-2")
-                        each_button.innerText = "manage"
-                        each_element.append(each_name)
-                        each_element.append(each_button)
-                        results.append(each_element)
-                    }
-                }
-                // submit.setAttribute("disabled", "false")
+    
+        $("#product_type").change(function(){
+            let type = $(this).val() 
+            if(type == "course"){
+                $("#course_container").show()
+                $("#software_container").hide()
             }
             else{
-                alert("You must enter the user's username")
+                $("#course_container").hide()
+                $("#software_container").show()
+
+            }
+        })
+
+        
+        $("#affliate").change(function(){
+            let type = $(this).val() 
+            if(type == "yes"){
+                $("#affliate_input").show()
+            }
+            else{
+                $("#affliate_input").hide()
             }
         })
     </script>
+    {{ ckeditor.load() }}
 {% endblock %}

@@ -2,70 +2,89 @@
 {% block title %}Product{% endblock %}
 {% block content%}
 <div>
-    <div class ="bg-white shadow rounded-lg p-1 p-4">
-        <p class="text-2xl"><b>{{ product.title}}</b></p>
-        <div class="flex">
+    <div class ="grid product-page bg-white shadow rounded-lg p-1 p-4 ">
+        <div>
             <div>
-                <img src="{{product.thumbnail}}" class="w-full md:w-2/5" alt="">
-            </div>
-            <div>
-                {% for i in product.product_image %}
-                    <img src="{{i.image_url}}" class="w-full h-48 md:w-2/5" alt="">
-                {% endfor %}
-            </div>
-            <br>
-        </div>
-        <div class="mt-2">
-            {% if product.youtube_link %}
-                <div class="my-2">
-                    <iframe src="{{product.youtube_link}}" frameborder="0" class="w-full md:w-3/5 h-48 md:h-64 m-auto"></iframe>
+                <div class="flex-shrink">
+                    <img src="{{product.thumbnail}}" class="w-full" alt="">
                 </div>
-            {% endif %}
-            <p class="text-xl"><i><b>description</b></i></p>
-            <p>{{ product.description}}</p>
-            <br>
-        
-                {% if product.product_type == "course" %}
-                {% if product.course_preview_link %}
-                        <div class="my-2">
-                            <iframe src="{{ product.course_preview_link }}" frameborder="0" class="w-full md:w-3/5 h-48 md:h-64 m-auto"></iframe>
-                        </div>
-                    {% endif %}
-                    <button type="pay" bool="" btn_id="{{ product.id}}" data="{{ product.title}}?{{ product.price}}?{{ product.id}}?{{ product.thumbnail}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md" id="buy" >Get Course!</button>
-                {% else%}
-                    {% if user_purchased.user_id == current_user.id and user_purchased.product_id == product.id %}
-                    <a href="{{product.download_link}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md hover:bg-white hover:text-yellow-500 border-2 border-yellow-500">Download</a>
-                    {% else %}
-                        {% if product.price %}
-                            <p> ₦{{ product.price }} - <span class="text-red-600 line-through">₦{{product.old_price}}</span> <span id="price-off">{{100 - ((product.price / product.old_price) * 100)}}</span>% off! </p>
-                        {% else %}
-                            <span class="rounded-lg shadow px-2 py-1 bg-green-500 text-green-100">Free</span>
+                <!-- <div>
+                    {% for i in product.product_image %}
+                        <img src="{{i.image_url}}" class="w-full h-48 md:w-2/5" alt="">
+                    {% endfor %}
+                </div> -->
+                <br>
+            </div>
+        </div>
+        <div class="ml-4">
+                <p class="text-2xl"><b>{{ product.title}}</b></p>
+                <div class="mt-2">
+                {% if product.youtube_link %}
+                    <div class="my-2">
+                        <iframe src="{{product.youtube_link}}" frameborder="0" class="w-full md:w-3/5 h-48 md:h-64 m-auto"></iframe>
+                    </div>
+                {% endif %}
+                <!-- <p class="text-xl"><i><b>description</b></i></p> -->
+                <p class="my-3">{{ product.description|safe}}</p>
+                <br>
+                {% if product.price %}
+                    <p class="my-3"> ₦{{ product.price }} - <span class="text-red-600 line-through">₦{{product.old_price}}</span> <span id="price-off">{{100 - ((product.price / product.old_price) * 100)}}</span>% off! </p>
+                {% else %}
+                    <span class="rounded-lg shadow px-2 py-1 bg-green-500 text-green-100">Free</span>
+                {% endif %}
+                    {% if product.product_type == "course" %}
+                        {% if product.course_preview_link %}
+                            <div class="my-2">
+                                <iframe src="{{ product.course_preview_link }}" frameborder="0" class="w-full md:w-3/5 h-48 md:h-64 m-auto"></iframe>
+                            </div>
                         {% endif %}
-        
-                        {% if not product.price %}
-                            {% if product.demo_link %}
-                                <a href="{{product.demo_link}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md"> Free download</a>
-                                <button type="free" bool=""  btn_id="{{ product.id}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md" >Free</button>
-                            {% endif %}
-                        {% else %}
                         {% if current_user.is_authenticated %}
-                            <div class="inline-block"><form id="buyNow" action="/paystack" method="post"><input type="hidden" name="data" id="formdata"><button class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Buy Now</button></form></div>
+                            <div class="inline-block"><form id="buyNow" action="/paystack" method="post"><input type="hidden" name="data" id="formdata"><button class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Get Course Now!</button></form></div>
                         {% else %}
                             <button id="buyNow" class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Buy Now</button>
                         {% endif %}
-                            <button type="pay" bool="" btn_id="{{ product.id}}" data="{{ product.title}}?{{ product.price}}?{{ product.id}}?{{ product.thumbnail}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md" id="buy" >buy</button>
-                            {% if product.demo_link %}
-                                <a href="{{product.demo_link}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md">Demo</a>
+                            
+                        <button type="pay" bool="" btn_id="{{ product.id}}" data="{{ product.title}}?{{ product.price}}?{{ product.id}}?{{ product.thumbnail}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md" id="buy" >Add to Cart</button>
+                    {% else%}
+                        {% if user_purchased.user_id == current_user.id and user_purchased.product_id == product.id %}
+                        <a href="{{product.download_link}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md hover:bg-white hover:text-yellow-500 border-2 border-yellow-500">Download</a>
+                        {% else %}
+                            {% if not product.price %}
+                                {% if product.demo_link %}
+                                    <a href="{{product.demo_link}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md"> Free download</a>
+                                    <button type="free" bool=""  btn_id="{{ product.id}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md" >Free</button>
+                                {% endif %}
+                            {% else %}
+                            {% if current_user.is_authenticated %}
+                                <div class="inline-block"><form id="buyNow" action="/paystack" method="post"><input type="hidden" name="data" id="formdata"><button class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Buy Now</button></form></div>
+                            {% else %}
+                                <button id="buyNow" class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Buy Now</button>
+                            {% endif %}
+                                <button type="pay" bool="" btn_id="{{ product.id}}" data="{{ product.title}}?{{ product.price}}?{{ product.id}}?{{ product.thumbnail}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md" id="buy" >buy</button>
+                                {% if product.demo_link %}
+                                    <a href="{{product.demo_link}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md">Demo</a>
+                                {% endif %}
                             {% endif %}
                         {% endif %}
+            
                     {% endif %}
-        
-                    {% if current_user.is_authenticated %}
-                        {% if current_user.id == product.store.user.id %}    
-                            <a href="../edit-item/{{ product.id }}">Edit product</a>
+
+                        {% if current_user.is_authenticated %}
+                            {% if current_user.id == product.store.user.id %}    
+                                <a href="../edit-item/{{ product.id }}">Edit product</a>
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
+                
+                {% if product.accept_affliate %}
+                    <br>
+                    <br>
+                    <br>
+                    <p class="text-lg"><u><b>Affliate System</b></u></p>
+                    <p> Your link referral link for this product is <span class="text-lg"><b>www.helpbotics.com{{ url_for(request.endpoint, pk=product.id, ref=current_user.id) }}.</b></span></p>
+                    <p>you will make a whooping {{ product.affliate_commission }}% commission on every successful sales you bring in which amounts to N{% if product.price %} {{ product.price * (product.affliate_commission / 100) }} {% endif %} for each sales.</p>
+                    <br>
                 {% endif %}
+            </div>
             </div>
         </div>
         <div >
@@ -170,7 +189,7 @@
     let cartPopup = (message) => {
         $("section").prepend(
             // <div id="popup" class="z-100 flex h-screen w-full absolute bg-gray-200 popup-style items-center justify-center ">
-            ` <div id="cartPopup" class="bg-green-500 rounded-xl p-2 float-right mr-2 border-2">
+            ` <div id="cartPopup" style=" top: 80px; width: 40%; float: right; position: fixed" class="bg-green-500 rounded-xl p-2 mr-2 border-2">
                     <div class="flex">
                         <p class="text-md text-white">${message}</p>
                         <span id="closeCartPopup" class="cursor-pointer text-2xl text-red-600 -mt-1 ml-4 ">&times;</span>

@@ -218,12 +218,16 @@ def youtube_filter(youtube_link):
 def add_items():
     if request.method ==  "POST":
         title = request.form.get("title")
-        description = request.form.get("description")
+        description = request.form.get("ckeditor")
         price = request.form.get("new_price")
         old_price = request.form.get("old_price")
         youtube_link = request.form.get("youtube_link")
         course_link = request.form.get("course_link")
         support_link = request.form.get("support_link")
+        affliate = request.form.get("affliate")
+        affliate_commission = request.form.get("affliate_commission")
+
+        accept_affliate = bool(affliate)
         
         course_preview_link = request.form.get("course_preview_link")
 
@@ -233,7 +237,7 @@ def add_items():
         course_link = youtube_filter(course_link)
         course_preview_link = youtube_filter(course_preview_link)
         store_id = current_user.store[0].id
-        product = Products(title=title, store_id=store_id, product_type=product_type, course_link=course_link, support_link=support_link, course_preview_link=course_preview_link, description=description, youtube_link=youtube_link, price=price, old_price=old_price)
+        product = Products(title=title, store_id=store_id, product_type=product_type, course_link=course_link, support_link=support_link, course_preview_link=course_preview_link, description=description, youtube_link=youtube_link, price=price, old_price=old_price, accept_affliate=accept_affliate, affliate_commission=affliate_commission)
         db.session.add(product)
         
         
@@ -333,6 +337,8 @@ def carts():
 @app.route("/product/<int:pk>", methods=["GET"])
 def product(pk):
     product = Products.query.filter_by(id=pk).first()
+    referral = request.args.get("ref")
+
     recommended_hamlet = generate_recommendation(product.title)
     search = f'({recommended_hamlet.replace(" ", ")|(")})'
     all_products = Products.query.filter(Products.id != pk, Products.title.op('regexp')(r'%s' %search)).all()[:4]
@@ -347,9 +353,9 @@ def product(pk):
             
     if current_user.is_authenticated:
         user_purchased = UserProducts.query.filter_by(user_id=current_user.id, product_id =pk).first()
-        return render_template("product.html", product=product, products=all_products, user_purchased=user_purchased)
+        return render_template("product.html", product=product, products=all_products, referral=referral, user_purchased=user_purchased,)
     else:
-        return render_template("product.html", product=product, products=all_products, user_purchased=None)
+        return render_template("product.html", product=product, products=all_products, referral=referral, user_purchased=None)
 
 
 @app.route("/edit-item/<int:pk>", methods=["GET", "POST"])
@@ -362,11 +368,14 @@ def edit_item(pk):
             return render_template("edit_item.html", users=users, product=product)
         
         title = request.form.get("title")
-        description = request.form.get("description")
+        description = request.form.get("ckeditor")
         price = request.form.get("new_price")
         old_price = request.form.get("old_price")
         youtube_link = request.form.get("youtube_link")
         support_link = request.form.get("support_link")
+        affliate = request.form.get("affliate")
+        affliate_commission = request.form.get("affliate_commission")
+        accept_affliate = bool(affliate)
         
         youtube_link = youtube_filter(youtube_link)
         
@@ -377,7 +386,10 @@ def edit_item(pk):
         product.store_id = store_id
         product.description = description
         product.youtube_link = youtube_link
-        
+        product.affliate_commission = affliate_commission
+        product.accept_affliate = accept_affliate
+        product.youtube_link = youtube_link
+
         if price:
             product.price = price
         else:
@@ -602,8 +614,8 @@ def email_unsubscribe():
     _email = request.args.get("email")
     email = EmailSubcribers.query.filter_by(email=_email).first()
     if email:
-        email.delete()
-        db.commit.session()
+        db.session.delete(email)
+        db.session.commit()
         flash("You have successful opt-out of our amazing newsletter")
     else:
         flash("Email doesn't exist")

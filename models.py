@@ -41,6 +41,7 @@ class User(db.Model, UserMixin ):
     password = db.Column(db.String(150))
     merchant_wallet = db.Column(db.Integer, default=0)
     Referral_wallet = db.Column(db.Integer, default=0)
+    # withdrawed_amount = db.Column(db.Integer, default=0)
     account_number = db.Column(db.String(10))
     account_name = db.Column(db.String(100))
     account_bank = db.Column(db.String(40))
@@ -141,8 +142,8 @@ class Products(db.Model):
     store_id = db.Column(db.Integer(), db.ForeignKey(Store.id))
     datetime = db.Column(db.DateTime, default=datetime.now())
     
-    has_product_key = db.Column(db.Boolean, default=False)
     
+    has_product_key = db.Column(db.Boolean, default=False)
     support_link = db.Column(db.String(1500))
     # Links
     product_type = thumbnail = db.Column(db.String(100)) 

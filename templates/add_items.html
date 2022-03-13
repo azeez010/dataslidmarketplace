@@ -5,14 +5,14 @@
 <div class="bg-gray-200 py-2 h-full px-2 md:px-24 mheight">
        <p class="text-2xl">Welcome {{ current_user.username }}</p> 
     <form id="postForm" method="post" enctype="multipart/form-data">
-        <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " type="search" placeholder="Product's title" name="title" id="search"><br>
-        <textarea id="mail_messages" placeholder="Product's description", class="rounded-lg bg-white w-full md:w-1/3 border-2 py-1 px-1 md:border-gray-500 md:h-32 sm:h-16 md:py-2 sm:py-2 " id="" name="description" cols="30" rows="5"></textarea><br>
+        <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " type="search" placeholder="Product's title" name="title" id="search"><br>
+        {{ ckeditor.create(value="") }}
         
-        <input value="0" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " name="old_price" type="text" placeholder="Old price" id="subject"><br>
-        <input value="0" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " name="new_price" type="text" placeholder="New price" id=""><br>
+        <input value="0" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="old_price" type="text" placeholder="Old price" id="subject"><br>
+        <input value="0" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="new_price" type="text" placeholder="New price" id=""><br>
         
         <p>Support group</p>
-        <input type="text" name="support_link" id="" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " type="text" placeholder="Support link"  value="">
+        <input type="text" name="support_link" id="" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " type="text" placeholder="Support link"  value="">
         
         
         <div id="photo_div">
@@ -20,20 +20,30 @@
             <input type="file" name="picture1" id="">
         </div>
 
-        <select name="product_type" id="product_type" class="border-2 border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2" id="" required>
+        <select name="affliate" id="affliate" class="border-2 border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2" id="" required>
+            <option value="">Do you want to accept affliate</option>
+            <option value="yes">Yes</option>
+            <option value="">No</option>
+        </select>
+
+        <div id="affliate_input" class="hidden">
+            <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="affliate_commission" type="number" min="0" max="100" placeholder="Enter affliate commission" required id="affliate_commission"><br>
+        </div>
+       
+        <select name="product_type" id="product_type" class="border-2 border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2" id="" required>
             <option value="">Select the product type</option>
             <option value="course">course</option>
             <option value="Software">Software</option>
         </select>
         
         <div id="course_container" class="hidden">
-            <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " name="course_link" type="text" placeholder="course link" id=""><br>
-            <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " name="course_preview_link" type="text" placeholder="course  preview link" id=""><br>
+            <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="course_link" type="text" placeholder="course link" id=""><br>
+            <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="course_preview_link" type="text" placeholder="course  preview link" id=""><br>
         </div>
         
         
         <div id="software_container" class="hidden">
-            <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full md:w-1/3 mt-2 mb-2 md:py-2 " name="youtube_link" type="text" placeholder="youtube link" id=""><br>
+            <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="youtube_link" type="text" placeholder="youtube link" id=""><br>
             <div>
                 <p>Upload the soft product's demo (optional)</p>
                 <input type="file" name="demo_product" id="">
@@ -45,7 +55,7 @@
             <br>
         </div>
         <br>
-        <button id="send_btn" class="bg-gray-500 hover hover:bg-gray-700 shadow-sm:hover text-white p-1 rounded-lg sm:mt-1 md:mt-2 md:py-2 md:px-8 sm:py-2 sm:px-4 sm:text-sm md:text-lg">Add product</button>
+        <button id="send_btn" class="bg-gray-500 hover hover:bg-gray-700 shadow-sm:hover text-white p-1 rounded-lg sm:mt-1 md:mt-2 md:py-2 md:px-8 sm:py-2 sm:px-4 sm:text-sm md:text-lg w-full">Add product</button>
     </form>
 
     <button id="add_picture">+ Add Pictures</button>
@@ -114,6 +124,17 @@
             }
         })
 
+         $("#affliate").change(function(){
+            let type = $(this).val() 
+            if(type == "yes"){
+                $("#affliate_input").show()
+            }
+            else{
+                $("#affliate_input").hide()
+            }
+        })
+
 
     </script>
+    {{ ckeditor.load() }}
 {% endblock %}

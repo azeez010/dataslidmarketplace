@@ -17,7 +17,7 @@
                 </div>
             {% endif %}
             <div class="ml-4">
-                <a class="text-2xl mb-4 mt-2 leading-8 font-semibold" target="_blank" href="{{ url_for('blog', id=blog.id, title=blog.slug )}}">{{ blog.title }}</a> 
+                <a class="text-2xl mb-4 mt-2 leading-8 font-semibold" href="{{ url_for('blog', id=blog.id, title=blog.slug )}}">{{ blog.title }}</a> 
                 <p class="text-gray-700 mt-2"><i>{{ blog.summary }}</i></p>
             </div>
         </div>
