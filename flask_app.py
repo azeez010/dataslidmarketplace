@@ -1,5 +1,5 @@
 import boto3, os, json, re
-
+import git
 from flask import  request, render_template, flash, redirect, url_for
 from passlib.hash import md5_crypt
 from is_safe_url import is_safe_url
@@ -79,6 +79,17 @@ class MyTransaction(Transaction):
 #     save_location.city = user_city['city']
 #     save_location.country = user_city["country_code"]
     
+
+
+#Route for the GitHub webhook
+@app.route('/git_update', methods=['POST'])
+def git_update():
+  repo = git.Repo('./dataslidmarketplace')
+  origin = repo.remotes.origin
+  repo.create_head('main', 
+  origin.refs.main).set_tracking_branch(origin.refs.main).checkout()
+  origin.pull()
+  return '', 200
 
 @app.route("/callback", methods=["POST", "GET"])
 def paycallback():
