@@ -89,6 +89,7 @@ def git_update():
     repo.create_head('master',
     origin.refs.master).set_tracking_branch(origin.refs.master).checkout()
     #repo.heads.master.set_tracking_branch(origin.refs.master)
+    #all note
     origin.pull()
     return '', 200
 
