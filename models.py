@@ -12,15 +12,17 @@ from flask_ckeditor import CKEditor
 app = Flask(__name__)
 
 URL = os.environ.get("DATABASE_URL")
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 if URL:
     app.config['SQLALCHEMY_DATABASE_URI'] = URL
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://azeez:azeez007@localhost/dataslid'
 
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://dataslid:azeez007@dataslid.mysql.pythonanywhere-services.com/dataslid$betbot'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False 
-app.config['SECRET_KEY'] = "d27e0926-13d9-11eb-900d-18f46ae7891e"
+app.config['SECRET_KEY'] = SECRET_KEY
+app.config['SQLALCHEMY_POOL_RECYCLE'] = 280
+app.config['SQLALCHEMY_POOL_TIMEOUT'] = 20
 app.config['TOKEN_EXPIRY_TIME'] = "10"
 app.config['CKEDITOR_PKG_TYPE'] = 'full'
 
