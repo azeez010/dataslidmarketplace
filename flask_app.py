@@ -14,7 +14,7 @@ from pypaystack import utils as pay_utils
 
 from utils import all_banks, change_rate, upload_image, send_mail, get_two_random_number, create_product_key, validate_email
 from helper import generate_recommendation
-from settings import PAYSTACK_SECRET, check_location
+from settings import PAYSTACK_SECRET, check_currency
 # For import all file basic_auth at once
 import import_all
 
@@ -357,7 +357,7 @@ def services():
 @app.route("/marketplace", methods=["GET"])
 def marketplace():
     ip_addr = request.remote_addr
-    loc = check_location(ip_addr)
+    loc = check_currency(ip_addr)
     print(loc)
     products = Products.query.all()[:8]
     return render_template("home.html", products=products)
@@ -411,8 +411,9 @@ def product(pk):
     referral = request.args.get("ref")
 
     ip_addr = request.remote_addr
-    loc, currency_spent = check_location(ip_addr)
+    currency_spent = check_currency(ip_addr)
     product_price = change_rate(product.price, currency_spent)
+    old_price = change_rate(product.old_price, currency_spent)
     recommended_hamlet = generate_recommendation(product.title)
     search = f'({recommended_hamlet.replace(" ", ")|(")})'
     all_products = Products.query.filter(Products.id != pk, Products.title.op('regexp')(r'%s' %search)).all()[:4]
@@ -428,9 +429,9 @@ def product(pk):
             
     if current_user.is_authenticated:
         user_purchased = UserProducts.query.filter_by(user_id=current_user.id, product_id =pk).first()
-        return render_template("product.html", product=product, products=all_products, referral=referral, currency_spent=currency_spent, product_price=product_price, user_purchased=user_purchased)
+        return render_template("product.html", product=product, products=all_products, referral=referral, currency_spent=currency_spent, product_price=product_price, old_price=old_price, user_purchased=user_purchased)
     else:
-        return render_template("product.html", product=product, products=all_products, referral=referral, currency_spent=currency_spent, product_price=product_price, user_purchased=None)
+        return render_template("product.html", product=product, products=all_products, referral=referral, currency_spent=currency_spent, product_price=product_price, old_price=old_price, user_purchased=None)
 
 
 @app.route("/edit-item/<int:pk>", methods=["GET", "POST"])

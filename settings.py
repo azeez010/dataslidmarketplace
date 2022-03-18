@@ -21,19 +21,19 @@ CURRENCIES = {}
 for row in csv_list:
     CURRENCIES[row[1]] = row[3]
 
-def check_location(ip):
+def check_currency(ip):
     try:
         response = reader.country(ip)
         currency_spent = CURRENCIES.get(response.country.iso_code)
         if currency_spent not in ACCEPTED_CURRENCIES:
             currency_spent = "USD"
 
-        return response.country.iso_code, currency_spent
+        return currency_spent
     except Exception as exc:
         print(exc)
-        return "US", "USD"
+        return "USD"
 
-print(check_location("206.71.50.230"))
+print(check_currency("206.71.50.230"))
 
 
     # is creates a Reader object. You should use the same object

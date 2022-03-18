@@ -22,8 +22,8 @@
                 <!-- <p class="text-xl"><i><b>description</b></i></p> -->
                 <p class="my-3">{{ product.description|safe}}</p>
                 <br>
-                {% if product.price %}
-                    <p class="my-3"> ₦{{ product.price }} - <span class="text-red-600 line-through">₦{{product.old_price}}</span> <span id="price-off">{{100 - ((product.price / product.old_price) * 100)}}</span>% off! </p>
+                {% if product_price %}
+                    <p class="my-3"> ₦{{ product_price }} - <span class="text-red-600 line-through">₦{{old_price}}</span> <span id="price-off">{{100 - ((product_price / old_price) * 100)}}</span>% off! </p>
                 {% else %}
                     <span class="rounded-lg shadow px-2 py-1 bg-green-500 text-green-100">Free</span>
                 {% endif %}
@@ -45,12 +45,12 @@
                             <button id="buyNow" class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Buy Now</button>
                         {% endif %}
                             
-                        <button type="pay" bool="" btn_id="{{ product.id}}" data="{{ product.title}}?{{ product.price}}?{{ product.id}}?{{ product.thumbnail}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md" id="buy" >Add to Cart</button>
+                        <button type="pay" bool="" btn_id="{{ product.id}}" data="{{ product.title}}?{{ product_price}}?{{ product.id}}?{{ product.thumbnail}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md" id="buy" >Add to Cart</button>
                     {% else%}
                         {% if user_purchased.user_id == current_user.id and user_purchased.product_id == product.id %}
                         <a href="{{product.download_link}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md hover:bg-white hover:text-yellow-500 border-2 border-yellow-500">Download</a>
                         {% else %}
-                            {% if not product.price %}
+                            {% if not product_price %}
                                 {% if product.demo_link %}
                                     <a href="{{product.demo_link}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md"> Free download</a>
                                     <button type="free" bool=""  btn_id="{{ product.id}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md" >Free</button>
@@ -60,14 +60,14 @@
                                 <div class="inline-block"><form id="buyNow" action="/paystack" method="post"><input type="hidden" name="data" id="formdata"><button class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Buy Now</button></form></div>
                                 <form>
                                     <div>
-                                      Your order is ₦{{product.price}}
+                                      Your order is ₦{{product_price}}
                                     </div>
                                     <button type="button" id="start-payment-button" onclick="makePayment()">Pay Now</button>
                                   </form>
                             {% else %}
                                 <button id="buyNow" class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Buy Now</button>
                             {% endif %}
-                                <button type="pay" bool="" btn_id="{{ product.id}}" data="{{ product.title}}?{{ product.price}}?{{ product.id}}?{{ product.thumbnail}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md" id="buy" >buy</button>
+                                <button type="pay" bool="" btn_id="{{ product.id}}" data="{{ product.title}}?{{ product_price}}?{{ product.id}}?{{ product.thumbnail}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md" id="buy" >buy</button>
                                 {% if product.demo_link %}
                                     <a href="{{product.demo_link}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md">Demo</a>
                                 {% endif %}
@@ -88,7 +88,7 @@
                     <br>
                     <p class="text-lg"><u><b>Affliate System</b></u></p>
                     <p> Your link referral link for this product is <span class="text-lg"><b>www.helpbotics.com{{ url_for(request.endpoint, pk=product.id, ref=current_user.id) }}.</b></span></p>
-                    <p>you will make a whooping {{ product.affliate_commission }}% commission on every successful sales you bring in which amounts to N{% if product.price %} {{ product.price * (product.affliate_commission / 100) }} {% endif %} for each sales.</p>
+                    <p>you will make a whooping {{ product.affliate_commission }}% commission on every successful sales you bring in which amounts to N{% if product_price %} {{ product_price * (product.affliate_commission / 100) }} {% endif %} for each sales.</p>
                     <br>
                 {% endif %}
             </div>
@@ -96,28 +96,29 @@
         </div>
         <div >
             {% if products %}
-                <p class="text-yellow-500 my-3 text-2xl md:text-2xl hero-title text-center">related <span class="border-b-2 text-blue-900 border-yellow-500">Products</span></p>
-            {% endif %}    
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
-            {% for _product in products %}
-                <div product_id="{{_product.id}}"class="market p-2 cursor-pointer my-3 m-2 rounded-lg  text-black dark:text-white sm:mt-2 shadow-md bg-white dark:bg-gray-700 center-grid justify-center content-center eachProject">
-                    {% if _product.thumbnail %}
-                    <img class="hover:filter blur-md w-full md:h-48" src="{{_product.thumbnail }}" alt="cbt app">
-                    {% else %}
-                    <img class="hover:filter blur-md" src="/static/cart.svg" alt="cbt app">
-                    {% endif %}
-                    <p class="font-bold sm:text-lg md:text-xl p-1 md:p-2">{{_product.title}}</p>
-                    <p class="md:mt-2 sm:mt-1 p-2">
-                    {% if _product.price %}
-                        <p> ₦{{ _product.price }} - <span class="text-red-600 line-through">₦{{_product.old_price}}</span> <span class="rounded-lg shadow px-2 py-1 bg-red-500 text-red-100"><span class="price-off ">{{100 - ((_product.price / _product.old_price) * 100)}}</span>% off! </span></p>
-                    {% else %}
-                        <span class="rounded-lg shadow px-2 py-1 bg-green-500 text-green-100">Free</span>
-                    {% endif %}
-                        <!-- <span>{{_product.price}} </span>   -->
-                    </p>    
-                </div>
-            {% endfor %}
+            <p class="text-yellow-500 my-3 text-2xl md:text-2xl hero-title text-center">related <span class="border-b-2 text-blue-900 border-yellow-500">Products</span></p>
+        {% endif %}    
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
+        {% for _product in products %}
+            <div product_id="{{_product.id}}"class="market p-2 cursor-pointer my-3 m-2 rounded-lg  text-black dark:text-white sm:mt-2 shadow-md bg-white dark:bg-gray-700 center-grid justify-center content-center eachProject">
+                {% if _product.thumbnail %}
+                <img class="hover:filter blur-md w-full md:h-48" src="{{_product.thumbnail }}" alt="cbt app">
+                {% else %}
+                <img class="hover:filter blur-md" src="/static/cart.svg" alt="cbt app">
+                {% endif %}
+                <p class="font-bold sm:text-lg md:text-xl p-1 md:p-2">{{_product.title}}</p>
+                <p class="md:mt-2 sm:mt-1 p-2">
+                {% if _product.price %}
+                    <p> ₦{{ _product.price }} - <span class="text-red-600 line-through">₦{{_product.old_price}}</span> <span class="rounded-lg shadow px-2 py-1 bg-red-500 text-red-100"><span class="price-off ">{{100 - ((_product.price / _product.old_price) * 100)}}</span>% off! </span></p>
+                {% else %}
+                    <span class="rounded-lg shadow px-2 py-1 bg-green-500 text-green-100">Free</span>
+                {% endif %}
+                    <!-- <span>{{_product.price}} </span>   -->
+                </p>    
+            </div>
+        {% endfor %}
+    
             <script src="https://apps.elfsight.com/p/platform.js" defer></script>
             <div class="elfsight-app-71cd6ef2-6f2b-494a-b49f-3793041a32d2"></div>
         </div>
@@ -399,7 +400,7 @@
     function insertObjectToCart(){
         let get_cart = []
         let price, title, type, _id;
-        let info  ="{{ product.title}}?{{ product.price}}?{{ product.id}}?{{ product.thumbnail}}"
+        let info  ="{{ product.title}}?{{ product_price}}?{{ product.id}}?{{ product.thumbnail}}"
         info = info.split("?")
         title = info[0];
         price = info[1];
