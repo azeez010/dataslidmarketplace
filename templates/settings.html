@@ -1,0 +1,52 @@
+{% extends "./base.html"%}
+{% block title %}User account details update{% endblock %}
+{% block content%}
+<style>
+        #email, #password, #username, #account_number, #account_name, #bank_name, #mobile_number, #bitcoin_wallet, #confirm_password, #country{
+                border-color: rgb(175, 175, 175);
+           }
+        #button{
+            background-color: blueviolet
+        }
+
+
+</style>
+    <div class="bg-white py-2 h-full sm:px-4 md:px-24 mheight">
+        <h1 class="text-4xl font-bold text-blue-700">Update your Details</h1>
+        <br>
+
+        <form action="" id="user_settings" method="post">
+        <p class="text-lg">Your account name</p>
+        <input id="account_name" class="border-2 placeholder-text-lg md:w-5/5 sm:3/5 px-4 mt-1 mb-2 md:py-4 sm:py-2 sm:px-2 sm:w-full md:w-lg" type="text" placeholder="Account Name ..." name="account_name" value="{% if current_user.account_name != None %}{{ current_user.account_name }}{% endif %}"><br>
+        <p class="text-lg">Your bank name</p>
+        <select name="bank_name" id="bank_name" class="border-2 placeholder-text-lg md:w-5/5 sm:3/5 px-4 mt-1 mb-2 md:py-4 sm:py-2 sm:px-2 sm:w-full md:w-lg" type="text" placeholder="Bank Name ..." name="bank_name">
+            {% for bank in banks %}
+                <option value="{{ bank.code }}" {% if current_user.account_bank == bank.code %}selected{% endif %}>{{bank.name}}</option>
+            {% endfor %}
+        </select>
+        <p class="text-lg">Your account number</p>
+        <input id="account_number" class="border-2 placeholder-text-lg md:w-5/5 sm:3/5 px-4 mt-1 mb-2 md:py-4 sm:py-2 sm:px-2 sm:w-full md:w-lg" type="number" placeholder="Account Number ..." name="account_number" value="{% if current_user.account_number != None %}{{ current_user.account_number }}{% endif %}"><br>
+        
+        <p id="error" class="text-lg my-2 text-red-500"></p>
+        <input id="button" type="submit" class="bg-blue-500 hover hover:bg-blue-700 shadow-sm:hover text-white p-1 rounded-lg sm:mt-2 md:mt-2 md:py-4 md:px-8 sm:py-2 sm:px-4 sm:text-md md:text-lg sm:w-full mt-2 md:w-lg" value="Update">
+
+    </form>
+    <br>
+    <br>
+</div>
+<script>
+    $("#user_settings").submit(function(e){
+        let accept = confirm("Are you sure that the bank details you input are correct?")
+        if(accept){
+            console.log($("#account_number").val().length)
+            if($("#account_number").val().length !== 10){
+                $("#error").text("Your account number digits must be ten")
+                e.preventDefault()
+            }
+        }
+        else{
+            e.preventDefault()
+        }
+    })
+</script>
+{% endblock %}

@@ -8,6 +8,9 @@ from flask_migrate import Migrate, MigrateCommand
 from flask_ckeditor import CKEditor
 
 
+CACHE_TIME = 0 
+CACHE_RATES = {}
+
 
 app = Flask(__name__)
 
@@ -20,7 +23,11 @@ else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://azeez:azeez007@localhost/dataslid'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False 
-app.config['SECRET_KEY'] = SECRET_KEY
+if SECRET_KEY:
+    app.config['SECRET_KEY'] = SECRET_KEY
+else:
+    app.config['SECRET_KEY'] = "SECRET_KEY"
+
 app.config['SQLALCHEMY_POOL_RECYCLE'] = 280
 app.config['SQLALCHEMY_POOL_TIMEOUT'] = 20
 app.config['TOKEN_EXPIRY_TIME'] = "10"
@@ -47,6 +54,7 @@ class User(db.Model, UserMixin ):
     account_number = db.Column(db.String(10))
     account_name = db.Column(db.String(100))
     account_bank = db.Column(db.String(40))
+
 
 
 class Transaction_Table(db.Model):
@@ -188,6 +196,7 @@ class Referral(db.Model):
     user_id = db.Column(db.Integer(), db.ForeignKey(User.id))
     product = db.relationship(Products, backref='referral', lazy=True)
     product_id = db.Column(db.Integer(), db.ForeignKey(Products.id))
+    commission = db.Column(db.Integer, default=0)
     
 class AdminStats(db.Model):
     __tablename__ = 'admin_stats'
@@ -224,6 +233,10 @@ class Blog(db.Model):
 
     is_updated = db.Column(db.Boolean, default=False)
 
-
+class Settings(db.Model):
+    __tablename__ = 'settings'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(350))
+    value = db.Column(db.Text)
 if __name__ == '__main__':
     manager.run()

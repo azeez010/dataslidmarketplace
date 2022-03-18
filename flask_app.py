@@ -12,9 +12,9 @@ from datetime import datetime
 from pypaystack import Transaction, errors
 from pypaystack import utils as pay_utils
 
-from utils import upload_image, send_mail, get_two_random_number, create_product_key, validate_email
+from utils import all_banks, change_rate, upload_image, send_mail, get_two_random_number, create_product_key, validate_email
 from helper import generate_recommendation
-from settings import PAYSTACK_SECRET
+from settings import PAYSTACK_SECRET, check_location
 # For import all file basic_auth at once
 import import_all
 
@@ -129,6 +129,18 @@ def paycallback():
                 db.session.add(user_product)
                 # Create product key
                 create_product_key(product_id)
+                refferal = _product_id.get("refferal")
+                if refferal.is_digit():
+                    get_refferal = User.query.filter_by(id=refferal).first()
+                    product = Products.query.filter_by(id=product_id).first()
+                    commission = product.price * (product.affliate_commission / 100)
+                    amount_sold = product.price - commission
+                    print(commission, amount_sold)
+
+                    if get_refferal:
+                        get_refferal.Referral_wallet += commission  
+                        current_user.merchant_wallet += amount_sold
+                        db.session.commit()
 
             get_transaction.transaction_complete = True
             db.session.commit()
@@ -207,6 +219,26 @@ def paystack():
     
     
     return redirect(init_transaction[3].get('authorization_url'))    
+
+@app.route("/withdraw", methods=["GET"])
+@login_required
+def withdrawal():
+    transaction = MyTransaction(authorization_key=PAYSTACK_SECRET)
+    bank_code = current_user.account_bank
+    bank_name = current_user.account_name
+    acc_no = current_user.account_number
+    amount_to_withdraw = current_user.merchant_wallet + current_user.Referral_wallet
+    trans = transaction.create_transfer_customer(bank_code, acc_no, bank_name)
+    created, ok = trans[:2]
+    data = trans[3]
+    print(created, ok)
+    if created == 201 and ok:
+        rec_code = data.get("recipient_code")
+        print(rec_code)
+        trans_res = transaction.transfer(rec_code, amount_to_withdraw, "Withdraw of all funds on helpbotics platform")
+        print(trans_res)
+    # print(trans)
+    return redirect(url_for("dashboard"))
 
 @app.route("/search", methods=["GET"])
 def search_market():
@@ -325,8 +357,8 @@ def services():
 @app.route("/marketplace", methods=["GET"])
 def marketplace():
     ip_addr = request.remote_addr
-    # loc = check_location(ip_addr)
-    # print(loc)
+    loc = check_location(ip_addr)
+    print(loc)
     products = Products.query.all()[:8]
     return render_template("home.html", products=products)
 
@@ -340,6 +372,32 @@ def market():
     # Inbox.query.filter_by(seen=False, user_id=current_user.id).order_by(Inbox.datetime.desc()).all()
     return render_template("market.html", products=products)
 
+@app.route("/affliate-market", methods=["GET"])
+def affliate_market():
+    affliate_products = Products.query.filter_by(accept_affliate=True).order_by(Products.datetime.desc()).all()
+    # Inbox.query.filter_by(seen=False, user_id=current_user.id).order_by(Inbox.datetime.desc()).all()
+    return render_template("affliate_market.html", products=affliate_products)
+
+@app.route("/user-update", methods=["GET", "POST"])
+@login_required
+def user_settings():
+    if request.method == "POST":
+        account_name = request.form.get("account_name")
+        account_number = request.form.get("account_number")
+        bank_name = request.form.get("bank_name")
+        current_user.account_name = account_name
+        current_user.account_number = account_number
+        current_user.account_bank = bank_name
+        
+        db.session.commit()
+
+        flash("You have successfully updated your account details")
+        return redirect(url_for('user_settings'))
+    else:
+        banks = all_banks()
+        return render_template("settings.html", banks=banks)
+
+
 @app.route("/carts", methods=["GET"])
 def carts():
     if current_user.is_authenticated:
@@ -352,10 +410,14 @@ def product(pk):
     product = Products.query.filter_by(id=pk).first()
     referral = request.args.get("ref")
 
+    ip_addr = request.remote_addr
+    loc, currency_spent = check_location(ip_addr)
+    product_price = change_rate(product.price, currency_spent)
     recommended_hamlet = generate_recommendation(product.title)
     search = f'({recommended_hamlet.replace(" ", ")|(")})'
     all_products = Products.query.filter(Products.id != pk, Products.title.op('regexp')(r'%s' %search)).all()[:4]
-    
+
+
     if not all_products:
         products = Products.query.filter(Products.id != pk)
         products_len = products.count()
@@ -366,9 +428,9 @@ def product(pk):
             
     if current_user.is_authenticated:
         user_purchased = UserProducts.query.filter_by(user_id=current_user.id, product_id =pk).first()
-        return render_template("product.html", product=product, products=all_products, referral=referral, user_purchased=user_purchased,)
+        return render_template("product.html", product=product, products=all_products, referral=referral, currency_spent=currency_spent, product_price=product_price, user_purchased=user_purchased)
     else:
-        return render_template("product.html", product=product, products=all_products, referral=referral, user_purchased=None)
+        return render_template("product.html", product=product, products=all_products, referral=referral, currency_spent=currency_spent, product_price=product_price, user_purchased=None)
 
 
 @app.route("/edit-item/<int:pk>", methods=["GET", "POST"])
@@ -573,33 +635,36 @@ def signup():
     form = MyForm()
     if request.method == "POST" and form.validate_on_submit():
         next_page = request.args.get("next")
-        
         password = form.password.data
         email = form.email.data
-        password = md5_crypt.hash(password)
-        check_for_first_user = len(User.query.all())
-        user = User(email=email, password=password)
-        
-        if not check_for_first_user:
-            user.is_admin = True
-        
-        db.session.add(user)
-        db.session.commit()
         
         user = User.query.filter_by(email=email).first()
-        login_user(user)
-        is_safe_url(next_page, request.url)
-        if is_safe_url(next_page, request.url):
-            return redirect(next_page)
-        return redirect("/market")
-
-        # Initialize the store table
-        # store = Store(user_id=user.id)
-        # db.session.add(store)
-        # db.session.commit()
-      
-        flash("You have signed up successfully")    
-        return redirect('/login')
+        if user and md5_crypt.verify(password, user.password):
+            login_user(user)
+            next_page = request.args.get("next")
+            is_safe_url(next_page, request.url)
+            if is_safe_url(next_page, request.url):
+                return redirect(next_page)
+            return redirect("/market") 
+        else:
+            password = md5_crypt.hash(password)
+            check_for_first_user = len(User.query.all())
+            user = User(email=email, password=password)
+            
+            if not check_for_first_user:
+                user.is_admin = True
+            
+            db.session.add(user)
+            db.session.commit()
+            
+            user = User.query.filter_by(email=email).first()
+            login_user(user)
+            is_safe_url(next_page, request.url)
+            if is_safe_url(next_page, request.url):
+                return redirect(next_page)
+            
+            flash("You have signed up successfully")    
+            return redirect('/market')
     else:
         return render_template("sign_up.html", form=form)
 

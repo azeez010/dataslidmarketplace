@@ -26,9 +26,7 @@
             <option value="">No</option>
         </select>
 
-        <div id="affliate_input" class="hidden">
-            <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="affliate_commission" type="number" min="0" max="100" placeholder="Enter affliate commission" required id="affliate_commission"><br>
-        </div>
+        
        
         <select name="product_type" id="product_type" class="border-2 border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2" id="" required>
             <option value="">Select the product type</option>
@@ -108,7 +106,7 @@
             }
         }
 
-        document.querySelector("#send_btn").addEventListener("click", mailFunc)
+        // document.querySelector("#send_btn").addEventListener("click", mailFunc)
         
     
         $("#product_type").change(function(){
@@ -127,10 +125,14 @@
          $("#affliate").change(function(){
             let type = $(this).val() 
             if(type == "yes"){
-                $("#affliate_input").show()
+                $("#affliate").after(`
+                <div id="affliate_input">
+                    <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="affliate_commission" type="number" min="0" max="100" placeholder="Enter affliate commission" required id="affliate_commission"><br>
+                </div>
+                `)
             }
             else{
-                $("#affliate_input").hide()
+                $("#affliate_input").remove()
             }
         })
 

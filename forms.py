@@ -13,10 +13,10 @@ class MyForm(FlaskForm):
         if len(password.data) < 7 or len(password.data) > 15:
             raise ValidationError("password must be greater 7 and less than 15")
     
-    def validate_email(self, email):
-        user = User.query.filter_by(email=email.data).first()
-        if user:
-            raise ValidationError("E-mail already exists")
+    # def validate_email(self, email):
+    #     user = User.query.filter_by(email=email.data).first()
+    #     if user:
+    #         raise ValidationError("E-mail already exists")
 
 
 class LoginForm(FlaskForm):

@@ -56,5 +56,3 @@ def seen_request():
 
     db.session.commit()
     return "success"
-
-

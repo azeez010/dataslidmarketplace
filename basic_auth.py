@@ -1,4 +1,4 @@
-from models import UserProducts, db, app, EmailSubcribers, ProductAuth, Transaction_Table, User, Reset_password, Make_request, Store, Products, ProductImage, Referral
+from models import UserProducts, db, app, Settings, EmailSubcribers, ProductAuth, Transaction_Table, User, Reset_password, Make_request, Store, Products, ProductImage, Referral
 from flask import url_for, request, redirect
 from flask_admin import Admin
 from flask_admin import Admin
@@ -55,3 +55,4 @@ admin.add_view(DefaultModelView(UserProducts, db.session))
 admin.add_view(DefaultModelView(Make_request, db.session))
 admin.add_view(DefaultModelView(EmailSubcribers, db.session))
 admin.add_view(DefaultModelView(ProductAuth, db.session))
+admin.add_view(DefaultModelView(Settings, db.session))

@@ -8,11 +8,6 @@
                 <div class="flex-shrink">
                     <img src="{{product.thumbnail}}" class="w-full" alt="">
                 </div>
-                <!-- <div>
-                    {% for i in product.product_image %}
-                        <img src="{{i.image_url}}" class="w-full h-48 md:w-2/5" alt="">
-                    {% endfor %}
-                </div> -->
                 <br>
             </div>
         </div>
@@ -40,6 +35,12 @@
                         {% endif %}
                         {% if current_user.is_authenticated %}
                             <div class="inline-block"><form id="buyNow" action="/paystack" method="post"><input type="hidden" name="data" id="formdata"><button class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Get Course Now!</button></form></div>
+                            <form>
+                                <div>
+                                  Your order is ₦{{product_price}}
+                                </div>
+                                <button type="button" id="start-payment-button" onclick="makePayment()">Pay Now</button>
+                              </form>
                         {% else %}
                             <button id="buyNow" class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Buy Now</button>
                         {% endif %}
@@ -57,6 +58,12 @@
                             {% else %}
                             {% if current_user.is_authenticated %}
                                 <div class="inline-block"><form id="buyNow" action="/paystack" method="post"><input type="hidden" name="data" id="formdata"><button class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Buy Now</button></form></div>
+                                <form>
+                                    <div>
+                                      Your order is ₦{{product.price}}
+                                    </div>
+                                    <button type="button" id="start-payment-button" onclick="makePayment()">Pay Now</button>
+                                  </form>
                             {% else %}
                                 <button id="buyNow" class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Buy Now</button>
                             {% endif %}
@@ -75,7 +82,7 @@
                             {% endif %}
                         {% endif %}
                 
-                {% if product.accept_affliate %}
+                {% if current_user.is_authenticated and product.accept_affliate %}
                     <br>
                     <br>
                     <br>
@@ -145,7 +152,11 @@
                 price = info[1];
                 _id = info[2];
                 thumbnail = info[3];
+                
+                let referral = "{{referral}}"
                 let data = {'id': _id, "type": type, "price": price, "title": title, "thumbnail": thumbnail}
+                if (referral != "None") data.referral = referral
+                console.log(data)
                 get_cart.push(data)
 
                 cartPopup(`{{ product.title }} Cart added`)
@@ -394,7 +405,10 @@
         price = info[1];
         _id = info[2];
         thumbnail = info[3];
+        
+        let referral = "{{referral}}"
         let data = {'id': _id, "type": type, "price": price, "title": title, "thumbnail": thumbnail}
+        if(referral != "None") data.referral = referral
         get_cart.push(data)
 
 
@@ -403,5 +417,32 @@
         localStorage.setItem("cart", JSON.stringify(get_cart))
         updateCartNumber()
     }
+</script>
+<script src="https://checkout.flutterwave.com/v3.js"></script>
+<script>
+  function makePayment() {
+    FlutterwaveCheckout({
+      public_key: "FLWPUBK-462136dd2325f9137f9fba2c95b505ae-X",
+      tx_ref: "titanic-48981487343MDI0NzMx",
+      amount: Number("{{product_price}}"),
+      currency: "{{ currency_spent }}",
+      payment_options: "card, banktransfer, ussd",
+      redirect_url: "https://glaciers.titanic.com/handle-flutterwave-payment",
+    //   meta: {
+    //     consumer_id: 23,
+    //     consumer_mac: "92a3-912ba-1192a",
+    //   },
+      customer: {
+        email: "{{current_user.email}}",
+        phone_number: "{{current_user.phone}}",
+        name: "{{current_user.name}}",
+      },
+      customizations: {
+        title: "Helpbotics",
+        description: "Payments for courses and softwares",
+        logo: "https://helpbotics.com/static/logo.png",
+      },
+    });
+  }
 </script>
 {% endblock %}

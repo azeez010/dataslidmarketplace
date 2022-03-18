@@ -1,8 +1,11 @@
-# import geoip2.database
+import geoip2.database, csv
+
 from os import getenv, path
 
 ENV = getenv("env")
+ACCEPTED_CURRENCIES = ["GBP", "CAD", "CVE", "CLP",  "COP", "CDF", "EGP", "EUR", "GMD", "GHS", "GNF", "KES", "LRD", "MWK", "MAD", "MZN", "NGN", "SOL", "RWF", "SLL", "STD", "ZAR", "TZS", "UGX", "USD", "XAF", "XOF", "ZMK", "ZMW", "BRL", "MXN", "ARS"]
 
+print(len(ACCEPTED_CURRENCIES))
 if ENV == "LIVE":
     PAYSTACK_SECRET = getenv("paystack_live")
 else:
@@ -10,15 +13,27 @@ else:
 
 static_path = path.abspath('./static')
 
-# reader = geoip2.database.Reader(f'{static_path}/GeoLite2-City.mmdb')
-# # print(cur_path)
-# def check_location(ip):
-#     try:
-#         response = reader.city(ip)
-#         return response.country.iso_code
-#     # US expection for unknown ip
-#     except Exception as exc:
-#         return "US"
+reader = geoip2.database.Reader(f'{static_path}/GeoLite2-Country.mmdb')
+csv_file = f'{static_path}/currency.csv'
+with open(csv_file, encoding="utf8") as read_file_data:
+    csv_list = list(csv.reader(read_file_data, delimiter=","))[1:]
+CURRENCIES = {}
+for row in csv_list:
+    CURRENCIES[row[1]] = row[3]
+
+def check_location(ip):
+    try:
+        response = reader.country(ip)
+        currency_spent = CURRENCIES.get(response.country.iso_code)
+        if currency_spent not in ACCEPTED_CURRENCIES:
+            currency_spent = "USD"
+
+        return response.country.iso_code, currency_spent
+    except Exception as exc:
+        print(exc)
+        return "US", "USD"
+
+print(check_location("206.71.50.230"))
 
 
     # is creates a Reader object. You should use the same object

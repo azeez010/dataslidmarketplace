@@ -128,10 +128,14 @@
         $("#affliate").change(function(){
             let type = $(this).val() 
             if(type == "yes"){
-                $("#affliate_input").show()
+                $("#affliate").after(`
+                <div id="affliate_input">
+                    <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="affliate_commission" type="number" min="0" max="100" placeholder="Enter affliate commission" required id="affliate_commission"><br>
+                </div>
+                `)
             }
             else{
-                $("#affliate_input").hide()
+                $("#affliate_input").remove()
             }
         })
     </script>

@@ -1,0 +1,29 @@
+{% extends "./base.html"%}
+{% block title %}User Dashboard{% endblock %}
+{% block content%}
+
+    <div class="bg-white py-2 h-full sm:px-4 md:px-24 mheight">
+        <h1 class="text-4xl font-bold text-blue-700">Your Details</h1>
+        <p>Your Main Account</p>
+        <p>N{{ current_user.merchant_wallet }}</p>
+        <p>Your Refferal Wallet</p>
+        <p>N{{ current_user.merchant_wallet }}</p>
+        
+    </div>
+</div>
+<script>
+    $("#user_settings").submit(function(e){
+        let accept = confirm("Are you sure that the bank details you input are correct?")
+        if(accept){
+            console.log($("#account_number").val().length)
+            if($("#account_number").val().length !== 10){
+                $("#error").text("Your account number digits must be ten")
+                e.preventDefault()
+            }
+        }
+        else{
+            e.preventDefault()
+        }
+    })
+</script>
+{% endblock %}
