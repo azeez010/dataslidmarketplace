@@ -5,10 +5,6 @@ from botocore.exceptions import ClientError
 from random import randint
 from time import time
 
-# Data
-# CACHE_RATES, CACHE_TIME
-# CACHE_RATES = {}
-# CACHE_TIME = 0
 
 def rate():
     cur_time = time()
@@ -31,7 +27,8 @@ def rate():
             return cache_rates
     
     else:
-        res = requests.get("http://data.fixer.io/api/latest?access_key=96c12a99df2b40b46e15f344833c1db7")
+        fixer_key = os.getenv("FIXER_KEY")
+        res = requests.get(f"http://data.fixer.io/api/latest?access_key={fixer_key}")
         rates = res.json().get("rates")
         values = {
             "time": cur_time + 43200,
@@ -44,18 +41,28 @@ def rate():
         db.session.commit()
         return rates
 
-def change_rate(NGN_rate, to_CUR):
+def change_rate(cash, base_CUR, to_CUR):
     to_rate = rate().get(to_CUR)
-    # NGN is the base Rate
-    base_rate = rate().get("NGN")
+    base_rate = rate().get(base_CUR)
     euro = 1 / base_rate
-    amount = euro * NGN_rate * to_rate 
+    amount = euro * cash * to_rate 
+    return round(amount, 2)
+
+def get_rate(base_CUR, to_CUR):
+    to_rate = rate().get(to_CUR)
+    base_rate = rate().get(base_CUR)
+    euro = 1 / base_rate
+    amount = euro * to_rate
     return amount
 
-print(change_rate(7250, "USD"))
-print(change_rate(7250, "GBP"))
-print(change_rate(7250, "NGN"))
-print(change_rate(7250, "EUR"))
+def only_rates():
+    return rate()
+
+
+# print(change_rate(7250, "USD"))
+# print(change_rate(7250, "GBP"))
+# print(change_rate(7250, "NGN"))
+# print(change_rate(7250, "EUR"))
 
     
     

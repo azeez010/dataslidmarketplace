@@ -3,12 +3,33 @@
 {% block content%}
 
     <div class="bg-white py-2 h-full sm:px-4 md:px-24 mheight">
-        <h1 class="text-4xl font-bold text-blue-700">Your Details</h1>
-        <p>Your Main Account</p>
-        <p>N{{ current_user.merchant_wallet }}</p>
-        <p>Your Refferal Wallet</p>
-        <p>N{{ current_user.merchant_wallet }}</p>
+        <h1 class="text-3xl font-bold text-blue-700">Quick Dashboard</h1>
+        <br>
+        <p class="text-2xl"><b>Your Main Account</b></p>
+        <p class="text-xl">{{current_user.merchant_wallet}} <b>{{ current_user.currency }}</b></p>
+        <p class="text-2xl"><b>Your Refferal Wallet</b></p>
+        <p class="text-xl">{{ current_user.Referral_wallet }} <b>{{ current_user.currency }}</b></p>
         
+        <br>
+        <br>
+        <p class="text-2xl">Total Amount to withdraw</p>
+        <p class="text-xl">{{ current_user.merchant_wallet + current_user.Referral_wallet }} <b>{{ current_user.currency }}</b></p>
+        <br>
+        <p class="text-red-500 my-3">Note: Only Nigerians Can withdraw for now the rest will follow suit</p>
+        {% if current_user.currency != "NGN" or (current_user.merchant_wallet + current_user.Referral_wallet)  < 5000 %}
+            <p class="text-red-500 my-3 font-bold"> Withdraw button is locked. The Minimum withdrawal is 5,000 {{ current_user.currency }} </p>
+        {% endif %}
+        <form action="/withdraw">
+            <button id="withdraw" {% if current_user.currency != "NGN" or (current_user.merchant_wallet + current_user.Referral_wallet)  < 5000 %} disabled type="button" disabled class="text-white cursor-not-allowed bg-gray-500 px-2 py-1 rounded-md shadow" {% else %}  class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow " {% endif %}>Withdraw your cash</button>
+        </form>
+        <br>
+        <p class="text-2xl"><u><b>Signup referral link</b></u></p>
+        <p class="text-xl">Your referral link is <b>https://helpbotics.com{{ url_for('signup', ref=current_user.id)}}</b></p>
+        <p>Copy the above link to start</p>
+        <br>
+        <p><b><i><a href="{{url_for('affliate_market')}}">click to see products up for affliate marketing</a></i></b></p>
+        <br>
+        <p><b><i><a href="{{url_for('user_settings')}}">click to Update your financial details or information</a></i></b></p>
     </div>
 </div>
 <script>

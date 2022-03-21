@@ -18,7 +18,7 @@
                         <p class="font-bold sm:text-lg md:text-xl p-1 md:p-2">{{_product.title}}</p>
                         <p class="md:mt-2 sm:mt-1 p-2">
                         {% if _product.price %}
-                            <p> ₦{{ _product.price}} - <span class="text-red-600 line-through">₦{{_product.old_price}}</span> <span class="rounded-lg shadow px-2 py-1 bg-red-500 text-red-100"><span class="price-off ">{% if _product.price and _product.old_price %} {{100 - ((_product.price / _product.old_price) * 100)}} {% endif %}</span> % off! </span></p>
+                            <p class="market_prices" amount="{{ _product.price }}?{{ _product.old_price }}?{{ _product.currency }}"> ₦{{ _product.price }} - <span class="text-red-600 line-through">₦{{_product.old_price}}</span> <span class="rounded-lg shadow px-2 py-1 bg-red-500 text-red-100"><span class="price-off ">{{100 - ((_product.price / _product.old_price) * 100)}}</span>% off! </span></p>
                         {% else %}
                             <span class="rounded-lg shadow px-2 py-1 bg-green-500 text-green-100">Free</span>
                         {% endif %}
@@ -34,5 +34,32 @@
         let product_id = $(this).attr("product_id")
         window.location.href = `/product/${product_id}`
     })
+
+    
+    const FOREX = JSON.parse("{{currency_rate}}".replaceAll("&#39;", '"'))
+    const currency_rate = (BASE_CUR, TO_CUR) => {
+        let to_rate = FOREX[TO_CUR]
+        let base_rate = FOREX[BASE_CUR]
+        euro = 1 / base_rate
+        amount = euro * to_rate
+        return amount
+    }
+
+    $(".market_prices").each(function(index, elem){
+        let attr = $(elem).attr("amount").split("?");
+        let currency = attr[2]
+        let currency_spent = "{{ currency_spent }}" 
+        console.log(attr, currency, currency_spent)
+        let rate = currency_rate(currency, currency_spent );
+        let new_price = (parseFloat(attr[0]) * rate).toFixed(2);
+        let old_price = (parseFloat(attr[1] ) * rate).toFixed(2);
+        let perc = 100 - ((new_price / old_price) * 100).toFixed(2)
+
+        $(elem).html(`
+        ${new_price} <b>{{ currency_spent }}</b> - <span class="text-red-600 line-through">${old_price} <b>{{ currency_spent }}</b></span> <span class="rounded-lg shadow px-2 py-1 bg-red-500 text-red-100"><span class="price-off ">${perc}</span>% off! </span>
+        `)
+
+    })
+
 </script>
 {% endblock %}

@@ -6,7 +6,7 @@
                 border-color: rgb(175, 175, 175);
            }
         #button{
-            background-color: blueviolet
+            background-color: rgb(30, 24, 61)
         }
 
 
@@ -26,9 +26,16 @@
         </select>
         <p class="text-lg">Your account number</p>
         <input id="account_number" class="border-2 placeholder-text-lg md:w-5/5 sm:3/5 px-4 mt-1 mb-2 md:py-4 sm:py-2 sm:px-2 sm:w-full md:w-lg" type="number" placeholder="Account Number ..." name="account_number" value="{% if current_user.account_number != None %}{{ current_user.account_number }}{% endif %}"><br>
-        
+        <p class="text-lg">Select your currency</p>
+        <select name="currency" class="border-2 border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2" id="" required>
+            <option value="{{ currency }}">-- SELECT YOUR CURRENCY --</option>
+            {% for currency in ACCEPTED_CURRENCIES %}
+                <option value="{{ currency }}" {% if current_user.currency == currency %} selected {% endif %}>{{ currency }}</option>
+            {% endfor %}
+        </select>
+
         <p id="error" class="text-lg my-2 text-red-500"></p>
-        <input id="button" type="submit" class="bg-blue-500 hover hover:bg-blue-700 shadow-sm:hover text-white p-1 rounded-lg sm:mt-2 md:mt-2 md:py-4 md:px-8 sm:py-2 sm:px-4 sm:text-md md:text-lg sm:w-full mt-2 md:w-lg" value="Update">
+        <input id="button" type="submit" class="bg-black-900 hover hover:bg-black-700 shadow-sm:hover text-white p-1 rounded-lg sm:mt-2 md:mt-2 md:py-4 md:px-8 sm:py-2 sm:px-4 sm:text-md md:text-lg sm:w-full mt-2 md:w-lg" value="Update">
 
     </form>
     <br>

@@ -8,11 +8,21 @@
         <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 "  placeholder="Product's title" name="title" value="{% if product.title %}{{ product.title }}{% endif %}"><br>
         {{ ckeditor.create(value=product.description|safe) }}
         
-        <input value="{% if product.price %}{{ product.price }}{% endif %}" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="old_price" type="text" placeholder="Old price" id="subject"><br>
-        <input value="{% if product.old_price %}{{ product.old_price }}{% endif %}" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="new_price" type="text" placeholder="New price" id=""><br>
+        <input value="{% if product.old_price %}{{ product.old_price }}{% endif %}" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="old_price" type="text" placeholder="Old price" id="subject"><br>
+        <input value="{% if product.price %}{{ product.price }}{% endif %}" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="new_price" type="text" placeholder="New price" id=""><br>
         
+        <select name="currency" class="border-2 border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2" id="" required>
+            <option value="{{ currency }}">-- SELECT YOUR CURRENCY --</option>
+            {% for currency in ACCEPTED_CURRENCIES %}
+                <option value="{{ currency }}" {% if product.currency == currency %} selected {% endif %}>{{ currency }}</option>
+            {% endfor %}
+        </select>
+
         <p>Support group</p>
         <input type="text" name="support_link" id="" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " type="text" placeholder="Support link"  value="{% if product.support_link %}{{ product.support_link }}{% endif %}">
+        
+        <p>Whatsapp Number for customer's support</p>
+        <input type="number" name="whatsapp_support" id="" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " type="text" placeholder="Enter your whatsapp support number (optional) eg. 234812726323"  value="{% if product.whatsapp_support %}{{ product.whatsapp_support }}{% endif %}">
         
         
         <div id="photo_div">
@@ -27,7 +37,7 @@
         </select>
 
         <div id="affliate_input" {% if not product.accept_affliate %} class="hidden" {% endif %}>
-            <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="affliate_commission" type="number" min="0" max="100" placeholder="Enter affliate commission" id="affliate_commission" value="{% if product.affliate_commission %}{{ product.affliate_commission }}{% endif %}"><br>
+            <input value="0" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="affliate_commission" type="number" min="0" max="100" placeholder="Enter affliate commission" id="affliate_commission" value="{% if product.affliate_commission %}{{ product.affliate_commission }}{% endif %}"><br>
         </div>
 
         <select name="product_type" id="product_type" class="border-2 border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2" id="" required>
@@ -108,7 +118,6 @@
             }
         }
 
-        document.querySelector("#send_btn").addEventListener("click", mailFunc)
         
     
         $("#product_type").change(function(){
@@ -124,20 +133,21 @@
             }
         })
 
-        
-        $("#affliate").change(function(){
-            let type = $(this).val() 
-            if(type == "yes"){
-                $("#affliate").after(`
-                <div id="affliate_input">
-                    <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="affliate_commission" type="number" min="0" max="100" placeholder="Enter affliate commission" required id="affliate_commission"><br>
-                </div>
-                `)
-            }
-            else{
-                $("#affliate_input").remove()
-            }
-        })
+        window.addEventListener("load", 
+            $("#affliate").change(function(){
+                let type = $(this).val() 
+                if(type == "yes"){
+                    $("#affliate").after(`
+                    <div id="affliate_input">
+                        <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="affliate_commission" type="number" min="0" max="100" placeholder="Enter affliate commission" required id="affliate_commission"><br>
+                    </div>
+                    `)
+                }
+                else{
+                    $("#affliate_input").remove()
+                }
+            })
+        )
     </script>
     {{ ckeditor.load() }}
 {% endblock %}

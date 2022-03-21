@@ -11,8 +11,18 @@
         <input value="0" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="old_price" type="text" placeholder="Old price" id="subject"><br>
         <input value="0" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="new_price" type="text" placeholder="New price" id=""><br>
         
+        <select name="currency" class="border-2 border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2" id="" required>
+            <option value="{{ currency }}">-- SELECT YOUR CURRENCY --</option>
+            {% for currency in ACCEPTED_CURRENCIES %}
+                <option value="{{ currency }}">{{ currency }}</option>
+            {% endfor %}
+        </select>
+
         <p>Support group</p>
         <input type="text" name="support_link" id="" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " type="text" placeholder="Support link"  value="">
+        
+        <p>Whatsapp Number for customer's support</p>
+        <input type="number" name="whatsapp_support" id="" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " type="text" placeholder="Enter your whatsapp support number (optional) eg. 234812726323"  value="">
         
         
         <div id="photo_div">
@@ -70,45 +80,7 @@
                 $("#photo_div").empty()
                 $("#photo_div").append(`<input type='file' name='picture${currentPictures}'>`)
           })
-
-        let mailFunc = async () =>{
-            let mail_message = document.getElementById("mail_messages").value
-            let subject = document.getElementById("subject").value
-            let user = document.getElementById("user").value
-            let mail_info = document.getElementById("mail_info")
-            
-            mail_info.innerText = "Loading..."
-            mail_info.setAttribute("class", "text-xl text-gray-600 py-3 block")
-            if(mail_message && user && subject){
-                const send_mail = await fetch('/mail-users', {
-                    method: 'POST',
-                    headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({user, subject, mail: mail_message})
-                });
-                const mail_res = await send_mail.json();
-                mail_info.innerText = ""
-                // console.log(mail_res);
-                if(mail_res.ok){
-                    mail_info.innerText = "You have successfully sent the mail(s)"
-                    mail_info.setAttribute("class", "text-xl text-green-600 py-3 block")
-                }   
-                else{
-                    mail_info.innerText = "Ooops! Mail failed"   
-                    mail_info.setAttribute("class", "text-xl text-red-600 block py-3") 
-                }
-            }
-            else{
-                mail_info.innerText = "Do not leave any field empty"
-                mail_info.setAttribute("class", "text-xl text-red-600 py-3 block")
-            }
-        }
-
-        // document.querySelector("#send_btn").addEventListener("click", mailFunc)
-        
-    
+              
         $("#product_type").change(function(){
             let type = $(this).val() 
             if(type == "course"){
@@ -121,21 +93,21 @@
 
             }
         })
-
-         $("#affliate").change(function(){
+        window.addEventListener("load",
+            $("#affliate").change(function(){
             let type = $(this).val() 
             if(type == "yes"){
                 $("#affliate").after(`
                 <div id="affliate_input">
-                    <input class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="affliate_commission" type="number" min="0" max="100" placeholder="Enter affliate commission" required id="affliate_commission"><br>
+                    <input value="0" class="border-2 placeholder-text-md border-gray-500 py-1 px-1 md:rounded-lg w-full mt-2 mb-2 md:py-2 " name="affliate_commission" type="number" min="0" max="100" placeholder="Enter affliate commission" required id="affliate_commission"><br>
                 </div>
-                `)
-            }
-            else{
-                $("#affliate_input").remove()
-            }
-        })
-
+                    `)
+                }
+                else{
+                    $("#affliate_input").remove()
+                }
+            })
+        )
 
     </script>
     {{ ckeditor.load() }}

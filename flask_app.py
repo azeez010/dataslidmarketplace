@@ -1,20 +1,21 @@
-import boto3, os, json, re
+import boto3, os, json, re, uuid
 import git
+from rave_python import Rave
 from flask import  request, render_template, flash, redirect, url_for
 from passlib.hash import md5_crypt
 from is_safe_url import is_safe_url
 from flask_humanize import Humanize
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user, current_user
 from forms import MyForm, LoginForm, TestimonyForm 
-from models import ProductAuth, Blog, Products, Store, UserProducts, User, EmailSubcribers, Testimonial, app, db, Transaction_Table
+from models import ProductAuth, Blog, Products, UserProducts, User, EmailSubcribers, Testimonial, app, db, Transaction_Table
 from schema import user_schema
 from datetime import datetime
 from pypaystack import Transaction, errors
 from pypaystack import utils as pay_utils
 
-from utils import all_banks, change_rate, upload_image, send_mail, get_two_random_number, create_product_key, validate_email
+from utils import all_banks, change_rate, only_rates, get_rate, upload_image, send_mail, get_two_random_number, create_product_key, validate_email
 from helper import generate_recommendation
-from settings import PAYSTACK_SECRET, check_currency
+from settings import PAYSTACK_SECRET, check_currency, ACCEPTED_CURRENCIES
 # For import all file basic_auth at once
 import import_all
 
@@ -93,6 +94,84 @@ def git_update():
     origin.pull()
     return '', 200
 
+
+@app.route("/comfirm-payment", methods=["POST"])
+def confirm_payment():
+    if request.method == "POST":
+        # Later implementation for sign up bonus
+        
+        charge_data = request.json
+        event = charge_data.get("event")
+        charge_main_data = charge_data.get("data")
+        ip_addr = charge_main_data.get("ip")
+        tx_ref = charge_main_data.get("tx_ref")
+        amount = charge_main_data.get("amount")
+        bought_amount = charge_main_data.get("amount")
+        currency = charge_main_data.get("currency")
+        buyer_email = charge_main_data.get("customer").get("email")
+        buyer = User.query.filter_by(email=buyer_email).first()
+
+        print(ip_addr, currency, buyer_email)
+        if event == "charge.completed" and ip_addr == "197.210.64.96":
+            transaction = Transaction_Table.query.filter_by(ref_no=tx_ref).first()    
+
+            get_transaction_data = transaction.product_data
+            load_data = json.loads(get_transaction_data)
+            load_data = load_data[0]
+            
+            product_id = load_data.get("id")
+            seller_id = load_data.get("seller_id")
+            seller = User.query.filter_by(id=seller_id)
+            product = Products.query.filter_by(id=product_id)
+            referral = load_data.get("referral")
+            
+            if referral:
+                user_referral = User.query.filter_by(id=referral)
+                affliate_commission = (product.affliate_commission / 100) * amount
+                # Remove Commision from the main money
+                amount -= affliate_commission 
+                referral_currency = user_referral.currency
+                # Change affliation commision
+                
+                affliate_money = change_rate(affliate_commission, currency, referral_currency)
+                user_referral.Referral_wallet += affliate_money
+
+                # Email To referral
+                send_mail("Goodnews from Helpbotics", f"You just made {affliate_money} {referral_currency} because {product.title} you promoted with your affliate link was sold successfully, Congratulations, Go to your dashboard for more details", user_referral.email)
+                print(affliate_money)
+
+                
+            
+            
+
+            amount = change_rate(product.price, product.currency, seller.currency)
+            
+            user_product = UserProducts(user_id=buyer.id, product_id=product_id)
+            db.session.add(user_product)
+                
+            # The remaining balance
+            seller.merchant_wallet += amount
+            if product.product_type == "Software":
+                create_product_key(product.id)
+            
+            # Email to Seller 
+            send_mail("Cheddar made! Congrats", f"You just made {amount} {seller.currency} because your product - {product.title} you posted on our platform was sold successfully, Congratulations, Go to your dashboard for more details", seller.email)
+            # Email to the Buyer
+            send_mail("Sweet, smooth purchase, hope you would love it!", f"You just bought {product.title} for {bought_amount} {currency} on our platform. We hope you enjoy it and come back to buy other live change products, If you love the product, you can make extra money by promoting and sharing your link to your loved ones.  Congrats, you can check you purchase in the download section, reach out to the creator or helpbotics support by clicking on the supports links or whatsapp tab on the application. You can also create threads to ask questions on our official forum, forum.helpbotics.com. Thanks ", buyer.email)
+            
+            transaction.amount = product.price 
+            transaction.transaction_complete = True
+
+            MAIL_SUBJECT = ""
+            MAIL_BODY = ""
+        
+            send_mail("", "", )
+ 
+            # Delete failed transactions
+            failed_transactions = Transaction_Table.query.filter_by(amount="")
+            db.session.delete(failed_transactions)
+            db.session.commit()
+            
 @app.route("/callback", methods=["POST", "GET"])
 def paycallback():
     print(request.method)
@@ -148,8 +227,11 @@ def paycallback():
             failed_transactions = Transaction_Table.query.filter_by(amount="")
             db.session.delete(failed_transactions)
             db.session.commit()
-    else:
-        return redirect(url_for('redirectThanks'))
+    # else:
+
+@app.route("/payment-success", methods=["POST", "GET"])
+def payment_success_page():
+    return redirect(url_for('redirectThanks'))
 
 # @app.route("/temp", methods=["GET", "POST"])
 # def temp():
@@ -162,7 +244,18 @@ def paycallback():
 #         create_product_key(product_id)
 #         db.session.commit()
 #     return redirect(url_for('my_downloads'))
-            
+
+@app.route("/initiate-transaction", methods=["GET", "POST"])
+def initiate_transaction():
+    reference = uuid.uuid4()
+    data = request.form.get("data")
+    transaction = Transaction_Table(ref_no=reference, product_data=data)
+    db.session.add(transaction)
+    db.session.commit()
+    return dict(status="success", ref=reference), 200
+    
+
+
 
 @app.route("/paystack", methods=["GET", "POST"])
 def paystack():
@@ -223,21 +316,29 @@ def paystack():
 @app.route("/withdraw", methods=["GET"])
 @login_required
 def withdrawal():
-    transaction = MyTransaction(authorization_key=PAYSTACK_SECRET)
-    bank_code = current_user.account_bank
-    bank_name = current_user.account_name
-    acc_no = current_user.account_number
-    amount_to_withdraw = current_user.merchant_wallet + current_user.Referral_wallet
-    trans = transaction.create_transfer_customer(bank_code, acc_no, bank_name)
-    created, ok = trans[:2]
-    data = trans[3]
-    print(created, ok)
-    if created == 201 and ok:
-        rec_code = data.get("recipient_code")
-        print(rec_code)
-        trans_res = transaction.transfer(rec_code, amount_to_withdraw, "Withdraw of all funds on helpbotics platform")
-        print(trans_res)
-    # print(trans)
+    # transaction = MyTransaction(authorization_key=PAYSTACK_SECRET)
+    try:
+        bank_code = current_user.account_bank
+        account_name = current_user.account_name
+        acc_no = current_user.account_number
+        amount_to_withdraw = current_user.merchant_wallet + current_user.Referral_wallet
+        rave_public = os.getenv("RAVE_PUBLIC")
+        rave_secret = os.getenv("RAVE_SECRET")
+        rave = Rave(rave_public, rave_secret, usingEnv = False)
+        res = rave.Transfer.initiate({
+            "account_bank": bank_code,
+            "account_number": acc_no,
+            "amount": amount_to_withdraw,
+            "narration": "New transfer",
+            "currency": "NGN",
+            "beneficiary_name": account_name
+            })
+        print(res)
+        flash(f"The payout for {amount_to_withdraw} {current_user.currency} was successfully")
+    except Exception as e:
+        print(e)
+        flash("The payout was failed")
+        
     return redirect(url_for("dashboard"))
 
 @app.route("/search", methods=["GET"])
@@ -270,6 +371,8 @@ def add_items():
         course_link = request.form.get("course_link")
         support_link = request.form.get("support_link")
         affliate = request.form.get("affliate")
+        currency = request.form.get("currency")
+        whatsapp_support = request.form.get("whatsapp_support")
         affliate_commission = request.form.get("affliate_commission")
 
         accept_affliate = bool(affliate)
@@ -282,7 +385,7 @@ def add_items():
         course_link = youtube_filter(course_link)
         course_preview_link = youtube_filter(course_preview_link)
         store_id = current_user.store[0].id
-        product = Products(title=title, store_id=store_id, product_type=product_type, course_link=course_link, support_link=support_link, course_preview_link=course_preview_link, description=description, youtube_link=youtube_link, price=price, old_price=old_price, accept_affliate=accept_affliate, affliate_commission=affliate_commission)
+        product = Products(title=title, store_id=store_id, product_type=product_type, whatsapp_support=whatsapp_support, course_link=course_link, support_link=support_link, course_preview_link=course_preview_link, description=description, youtube_link=youtube_link, price=price, old_price=old_price, accept_affliate=accept_affliate, affliate_commission=affliate_commission, currency=currency)
         db.session.add(product)
         
         
@@ -298,141 +401,13 @@ def add_items():
                     upload_image(product, file_exists, "image")
     
         db.session.commit()
-                    # product_id = product.id
-                    # first = 0
-                    # filename = file_exists.filename
-                    # storage_key = os.environ.get("aws_key")
-                    # storage_secret = os.environ.get("aws_secret")
-                    # storage_bucket = "dataslid"
-                    # urlExpiryTime = 604799
-                    # download_expiry_time = time.time() + urlExpiryTime
-                    # # Set Expiry time
-                    # product.s3_expiry_time = download_expiry_time
-
-                    # conn = boto3.client(
-                    #     's3',
-                    #     aws_access_key_id=storage_key,
-                    #     aws_secret_access_key=storage_secret
-                    #     )
-
-                    # Key = f'images/{filename}'
-                    # conn.upload_fileobj(file_exists, storage_bucket, Key)
-                    # image_url = conn.generate_presigned_url(ClientMethod='get_object', Params={
-                    #     'Bucket': storage_bucket,
-                    #     'Key': Key
-                    # }, ExpiresIn=urlExpiryTime)
-
-                    
-                    # product_image = ProductImage(image_url=image_url, product_id=product_id)
-                    # db.session.add(product_image)
-                    
-                    # if first == 0:
-                    #     product.thumbnail = image_url
-                    #     product.thumbnail_key = Key
-                
-                    # db.session.commit()
-
-                    # first += 1
-        
         flash("You have successfully added new stuff for sell")
-    users = User.query.all()
-    return render_template("add_items.html", users=users)
     
+    if not current_user.currency:
+        return redirect(url_for('user_settings')) 
 
-
-# Redirect / to home
-@app.route("/", methods=["GET"])
-def no_route():
-    return redirect(url_for("marketplace"))
+    return render_template("add_items.html", ACCEPTED_CURRENCIES=ACCEPTED_CURRENCIES)
     
-@app.route("/home", methods=["GET", "POST"])
-def home():
-    return redirect(url_for("marketplace"))
-
-
-@app.route("/services", methods=["GET", "POST"])
-def services():
-    return render_template("dataslid/index.html")
-
-@app.route("/marketplace", methods=["GET"])
-def marketplace():
-    ip_addr = request.remote_addr
-    loc = check_currency(ip_addr)
-    print(loc)
-    products = Products.query.all()[:8]
-    return render_template("home.html", products=products)
-
-@app.route("/redirect", methods=["GET", "POST"])
-def redirectThanks():
-    return render_template("redirect.html")
-
-@app.route("/market", methods=["GET"])
-def market():
-    products = Products.query.order_by(Products.datetime.desc()).all()
-    # Inbox.query.filter_by(seen=False, user_id=current_user.id).order_by(Inbox.datetime.desc()).all()
-    return render_template("market.html", products=products)
-
-@app.route("/affliate-market", methods=["GET"])
-def affliate_market():
-    affliate_products = Products.query.filter_by(accept_affliate=True).order_by(Products.datetime.desc()).all()
-    # Inbox.query.filter_by(seen=False, user_id=current_user.id).order_by(Inbox.datetime.desc()).all()
-    return render_template("affliate_market.html", products=affliate_products)
-
-@app.route("/user-update", methods=["GET", "POST"])
-@login_required
-def user_settings():
-    if request.method == "POST":
-        account_name = request.form.get("account_name")
-        account_number = request.form.get("account_number")
-        bank_name = request.form.get("bank_name")
-        current_user.account_name = account_name
-        current_user.account_number = account_number
-        current_user.account_bank = bank_name
-        
-        db.session.commit()
-
-        flash("You have successfully updated your account details")
-        return redirect(url_for('user_settings'))
-    else:
-        banks = all_banks()
-        return render_template("settings.html", banks=banks)
-
-
-@app.route("/carts", methods=["GET"])
-def carts():
-    if current_user.is_authenticated:
-        return render_template("carts.html")
-    else:
-        return redirect("/login?next=carts")
-
-@app.route("/product/<int:pk>", methods=["GET"])
-def product(pk):
-    product = Products.query.filter_by(id=pk).first()
-    referral = request.args.get("ref")
-
-    ip_addr = request.remote_addr
-    currency_spent = check_currency(ip_addr)
-    product_price = change_rate(product.price, currency_spent)
-    old_price = change_rate(product.old_price, currency_spent)
-    recommended_hamlet = generate_recommendation(product.title)
-    search = f'({recommended_hamlet.replace(" ", ")|(")})'
-    all_products = Products.query.filter(Products.id != pk, Products.title.op('regexp')(r'%s' %search)).all()[:4]
-
-
-    if not all_products:
-        products = Products.query.filter(Products.id != pk)
-        products_len = products.count()
-        start, end = get_two_random_number(products_len)
-    
-        # Slice Data out
-        all_products = products.all()[start:end]
-            
-    if current_user.is_authenticated:
-        user_purchased = UserProducts.query.filter_by(user_id=current_user.id, product_id =pk).first()
-        return render_template("product.html", product=product, products=all_products, referral=referral, currency_spent=currency_spent, product_price=product_price, old_price=old_price, user_purchased=user_purchased)
-    else:
-        return render_template("product.html", product=product, products=all_products, referral=referral, currency_spent=currency_spent, product_price=product_price, old_price=old_price, user_purchased=None)
-
 
 @app.route("/edit-item/<int:pk>", methods=["GET", "POST"])
 def edit_item(pk):
@@ -451,6 +426,8 @@ def edit_item(pk):
         support_link = request.form.get("support_link")
         affliate = request.form.get("affliate")
         affliate_commission = request.form.get("affliate_commission")
+        currency = request.form.get("currency")
+        whatsapp_support = request.form.get("whatsapp_support")
         accept_affliate = bool(affliate)
         
         youtube_link = youtube_filter(youtube_link)
@@ -465,6 +442,8 @@ def edit_item(pk):
         product.affliate_commission = affliate_commission
         product.accept_affliate = accept_affliate
         product.youtube_link = youtube_link
+        product.currency = currency
+        product.whatsapp_support = whatsapp_support
 
         if price:
             product.price = price
@@ -493,9 +472,108 @@ def edit_item(pk):
         return redirect(url_for('product', pk=product.id))
 
     users = User.query.all()
-    return render_template("edit_item.html", users=users, product=product)
+    return render_template("edit_item.html", users=users, product=product, ACCEPTED_CURRENCIES=ACCEPTED_CURRENCIES)
     
+@app.route("/", methods=["GET"])
+def no_route():
+    return redirect(url_for("marketplace"))
     
+@app.route("/home", methods=["GET", "POST"])
+def home():
+    return redirect(url_for("marketplace"))
+
+
+@app.route("/services", methods=["GET", "POST"])
+def services():
+    return render_template("dataslid/index.html")
+
+@app.route("/marketplace", methods=["GET"])
+def marketplace():
+    ip_addr = request.remote_addr
+    currency_spent = check_currency(ip_addr)
+    currency_rate = only_rates()
+    products = Products.query.all()[:8]
+    return render_template("home.html", products=products, currency_spent=currency_spent, currency_rate=currency_rate)
+
+@app.route("/redirect", methods=["GET", "POST"])
+def redirectThanks():
+    return render_template("redirect.html")
+
+@app.route("/market", methods=["GET"])
+def market():
+    ip_addr = request.remote_addr
+    currency_spent = check_currency(ip_addr)
+    products = Products.query.order_by(Products.datetime.desc()).all()
+    rates = only_rates()
+    return render_template("market.html", products=products, currency_spent=currency_spent, currency_rate=rates)
+
+@app.route("/affliate-market", methods=["GET"])
+def affliate_market():
+    ip_addr = request.remote_addr
+    currency_spent = check_currency(ip_addr)
+    currency_rate = only_rates()
+    affliate_products = Products.query.filter_by(accept_affliate=True).order_by(Products.datetime.desc()).all()
+    return render_template("affliate_market.html", products=affliate_products, currency_spent=currency_spent, currency_rate=currency_rate)
+
+@app.route("/user-update", methods=["GET", "POST"])
+@login_required
+def user_settings():
+    if request.method == "POST":
+        account_name = request.form.get("account_name")
+        account_number = request.form.get("account_number")
+        bank_name = request.form.get("bank_name")
+        currency = request.form.get("currency")
+        current_user.account_name = account_name
+        current_user.account_number = account_number
+        current_user.account_bank = bank_name
+        current_user.currency = currency
+        
+        db.session.commit()
+
+        flash("You have successfully updated your account details")
+        return redirect(url_for('user_settings'))
+    else:
+        banks = all_banks()
+        return render_template("settings.html", banks=banks, ACCEPTED_CURRENCIES=ACCEPTED_CURRENCIES)
+
+
+@app.route("/carts", methods=["GET"])
+def carts():
+    if current_user.is_authenticated:
+        return render_template("carts.html")
+    else:
+        return redirect("/login?next=carts")
+
+@app.route("/product/<int:pk>", methods=["GET"])
+def product(pk):
+    product = Products.query.filter_by(id=pk).first()
+    referral = request.args.get("ref")
+
+    ip_addr = request.remote_addr
+    recommended_hamlet = generate_recommendation(product.title)
+    search = f'({recommended_hamlet.replace(" ", ")|(")})'
+    all_products = Products.query.filter(Products.id != pk, Products.title.op('regexp')(r'%s' %search)).all()[:4]
+
+    product_currency = product.currency
+    currency_spent = check_currency(ip_addr)
+    product_price = change_rate(product.price, product_currency, currency_spent)
+    old_price = change_rate(product.old_price, product_currency, currency_spent)
+
+
+    currency_rate = only_rates()
+    if not all_products:
+        products = Products.query.filter(Products.id != pk)
+        products_len = products.count()
+        start, end = get_two_random_number(products_len)
+    
+        # Slice Data out
+        all_products = products.all()[start:end]
+            
+    if current_user.is_authenticated:
+        user_purchased = UserProducts.query.filter_by(user_id=current_user.id, product_id =pk).first()
+        return render_template("product.html", product=product, currency_rate=currency_rate, products=all_products, referral=referral, currency_spent=currency_spent, product_price=product_price, old_price=old_price, user_purchased=user_purchased)
+    else:
+        return render_template("product.html", product=product, currency_rate=currency_rate, products=all_products, referral=referral, currency_spent=currency_spent, product_price=product_price, old_price=old_price, user_purchased=None)    
 
 @app.route("/my-downloads", methods=["GET"])
 def my_downloads():
@@ -615,6 +693,7 @@ def login():
         user = User.query.filter_by(email=email).first()
         if user and md5_crypt.verify(password, user.password):
             login_user(user)
+            send_mail("Welcome back to Helpbotics", "We are glad to see you here once more! If you can buy and sell any useful digital product and get your money in real-time, We also have affliate plans to enable people to make side bucks, you can refer new people to the platform and earn close to 1 USD per referral. Check your Dashboard, complete your financial imformation, copy your referral link and start making cool cash! if you need any help with purchase, don't hesistate to contact our support at https://wa.me/2348127216323. You can also ask the community questions, check https://forum.helpbotics.com to get started.", email)
             next_page = request.args.get("next")
             is_safe_url(next_page, request.url)
             if is_safe_url(next_page, request.url):
@@ -629,6 +708,7 @@ def login():
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     next_page = request.args.get("next")
+    ref = request.args.get("ref")
        
     if current_user.is_authenticated:
         return redirect(url_for('market'))
@@ -642,6 +722,7 @@ def signup():
         user = User.query.filter_by(email=email).first()
         if user and md5_crypt.verify(password, user.password):
             login_user(user)
+            send_mail("Welcome back to Helpbotics", "We are glad to see you here once more! If you can buy and sell any useful digital product and get your money in real-time, We also have affliate plans to enable people to make side bucks, you can refer new people to the platform and earn close to 1 USD per referral. Check your Dashboard, complete your financial imformation, copy your referral link and start making cool cash! if you need any help with purchase, don't hesistate to contact our support at https://wa.me/2348127216323. You can also ask the community questions, check https://forum.helpbotics.com to get started.", email)
             next_page = request.args.get("next")
             is_safe_url(next_page, request.url)
             if is_safe_url(next_page, request.url):
@@ -650,7 +731,10 @@ def signup():
         else:
             password = md5_crypt.hash(password)
             check_for_first_user = len(User.query.all())
-            user = User(email=email, password=password)
+            if ref:
+                user = User(email=email, password=password, referral_id=ref)
+            else:
+                user = User(email=email, password=password)
             
             if not check_for_first_user:
                 user.is_admin = True
@@ -658,6 +742,7 @@ def signup():
             db.session.add(user)
             db.session.commit()
             
+            send_mail("Welcome to Helpbotics!", "You have successfully sign up to helpbotics, Helpbotics is a platform of many opportunities, you can buy and sell any useful digital product and get your money in real-time, We also have affliate plans to enable people to make side bucks, you can refer new people to the platform and earn close to 1 USD per referral. Check your Dashboard, complete your financial imformation, copy your referral link and start making cool cash! if you need any help with purchase, don't hesistate to contact our support at https://wa.me/2348127216323. You can also ask the community questions, check https://forum.helpbotics.com to get started. Thanks for joining us!",  email)
             user = User.query.filter_by(email=email).first()
             login_user(user)
             is_safe_url(next_page, request.url)

@@ -1,7 +1,6 @@
 {% extends "./base.html"%}
 {% block title %}Dataslid Marketplace{% endblock %}
 {% block content%}
-<!-- <div> -->
     <style>
         body{
             background-color: white;
@@ -10,9 +9,9 @@
     <div class="md:h-screen sm:block bg-white sm:px-1 md:px-4 md:mt-4">
         <div class="block md:flex ">    
             <div class="mt:2 md:mt-24 p-2 md:p-4 ">
-                <h1 class="text-gray-700 font-semibold text-3xl md:text-5xl  hero-title"><span class="text-yellow-500">Dataslid</span> Marketplace</h1>
+                <h1 class="text-gray-700 font-semibold text-3xl md:text-5xl  hero-title"><span class="text-yellow-500">Helpbotics</span> Marketplace</h1>
                 <p class="text-blue-900 py-3  text-lg md:text-xl font-normal">
-                    This is the Official Store for Dataslid Tech youtube channel. You can get all the software talked about on the channel here.
+                   This is the one number soft Product market in the world i.e software, ebook etc. You can sell or buy all digital products in all major currencies around the global, payment is no longer a barrier.
                 </p>
                 <div class="flex">
                     <a href="/market" class="rounded-sm bg-yellow-500 text-md py-2 px-4 rounded-lg md:rounded-2xl text-white md:text-xl md:py-4 md:px-8">Enter Market</a>
@@ -22,7 +21,25 @@
                 <img src="static/hero.svg" class="md:block sm:hidden" alt="" srcset="">
             </div>
         </div>
+    </div>
+
+    <div class=" bg-white">
+        <div class="block md:flex">    
+            <div class="mt:2 md:mt-24 p-2 md:p-4 ">
+                <h1 class="text-gray-700 font-semibold text-3xl md:text-5xl  hero-title"><span class="text-yellow-500">Affliate</span> Marketing</h1>
+                <p class="text-blue-900 py-3  text-lg md:text-xl font-normal">
+                   You can make a lot of cool cash by promoting other people's product on the affliate network market or by sharing your sign up referral link for other people in your network to sign up. 
+                </p>
+                <p class="my-2 text-blue-900 py-3  text-lg md:text-xl font-normal">We also have affliate plans to enable people to make side bucks, you can refer new people to the platform and earn close to 1 USD per referral. Check your Dashboard, complete your financial imformation, copy your referral link and start making cool cash! if you need any help with purchase, don't hesistate to contact our support at <span class="text-2xl"><b><a href="https://wa.me/2348127216323">Click to chat</a></b></span>. You can also ask the community questions, check https://forum.helpbotics.com to get started.</p>
+                <div class="flex">
+                    <a href="/signup" class="rounded-sm bg-yellow-500 text-md py-2 px-4 rounded-lg md:rounded-2xl text-white md:text-xl md:py-4 md:px-8">Register Now</a>
+                </div>
+            </div>
+            <div>
+                <img src="static/gifting.svg" class="" alt="" srcset="">
+            </div>
         </div>
+    </div>
         
         <div>
             <p class="text-yellow-500 text-xl md:text-2xl hero-title text-center">Our <span class="border-b-2 text-blue-900 border-yellow-500">Products</span></p>            
@@ -37,7 +54,7 @@
                         <p class="font-bold sm:text-lg md:text-xl p-1 md:p-2">{{_product.title}}</p>
                         <p class="md:mt-2 sm:mt-1 p-2">
                         {% if _product.price %}
-                            <p> ₦{{ _product.price }} - <span class="text-red-600 line-through">₦{{_product.old_price}}</span> <span class="price-off">{{100 - ((_product.price / _product.old_price) * 100)}}</span>% off! </p>
+                        <p class="market_prices" amount="{{ _product.price }}?{{ _product.old_price }}?{{ _product.currency }}"> ₦{{ _product.price }} - <span class="text-red-600 line-through">₦{{_product.old_price}}</span> <span class="rounded-lg shadow px-2 py-1 bg-red-500 text-red-100"><span class="price-off ">{{100 - ((_product.price / _product.old_price) * 100)}}</span>% off! </span></p>
                         {% else %}
                             <span class="rounded-lg shadow px-2 py-1 bg-green-500 text-green-100">Free</span>
                         {% endif %}
@@ -56,6 +73,30 @@
     $(".market").click(function(){
         let product_id = $(this).attr("product_id")
         window.location.href = `/product/${product_id}`
+    })
+    
+    const FOREX = JSON.parse("{{currency_rate}}".replaceAll("&#39;", '"'))
+    const currency_rate = (BASE_CUR, TO_CUR) => {
+        let to_rate = FOREX[TO_CUR]
+        let base_rate = FOREX[BASE_CUR]
+        euro = 1 / base_rate
+        amount = euro * to_rate
+        return amount
+    }
+
+    $(".market_prices").each(function(index, elem){
+        let attr = $(elem).attr("amount").split("?");
+        let currency = attr[2]
+        let currency_spent = "{{ currency_spent }}" 
+        console.log(attr, currency, currency_spent)
+        let rate = currency_rate(currency, currency_spent );
+        let new_price = (parseFloat(attr[0]) * rate).toFixed(2);
+        let old_price = (parseFloat(attr[1] ) * rate).toFixed(2);
+        let perc = 100 - ((new_price / old_price) * 100).toFixed(2)
+
+        $(elem).html(`
+        ${new_price} <b>{{ currency_spent }}</b> - <span class="text-red-600 line-through">${old_price} <b>{{ currency_spent }}</b></span> <span class="rounded-lg shadow px-2 py-1 bg-red-500 text-red-100"><span class="price-off ">${perc}</span>% off! </span>
+        `)
     })
 </script>
 {% endblock %}

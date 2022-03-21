@@ -23,7 +23,7 @@
                 <p class="my-3">{{ product.description|safe}}</p>
                 <br>
                 {% if product_price %}
-                    <p class="my-3"> ₦{{ product_price }} - <span class="text-red-600 line-through">₦{{old_price}}</span> <span id="price-off">{{100 - ((product_price / old_price) * 100)}}</span>% off! </p>
+                    <p class="my-3"> {{ product_price }} <b>{{currency_spent}}</b> - <span class="text-red-600 line-through">{{old_price}} <b>{{currency_spent}}</b></span> <span id="price-off">{{100 - ((product_price / old_price) * 100)}}</span>% off! </p>
                 {% else %}
                     <span class="rounded-lg shadow px-2 py-1 bg-green-500 text-green-100">Free</span>
                 {% endif %}
@@ -34,18 +34,15 @@
                             </div>
                         {% endif %}
                         {% if current_user.is_authenticated %}
-                            <div class="inline-block"><form id="buyNow" action="/paystack" method="post"><input type="hidden" name="data" id="formdata"><button class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Get Course Now!</button></form></div>
-                            <form>
-                                <div>
-                                  Your order is ₦{{product_price}}
-                                </div>
-                                <button type="button" id="start-payment-button" onclick="makePayment()">Pay Now</button>
-                              </form>
+                            <!-- <div class="inline-block"><form id="buyNow" action="/paystack" method="post"><input type="hidden" name="data" id="formdata"><button class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Get Course Now!</button></form></div> -->
+                            <!-- <form> -->
+                                <button class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow" type="button" id="start-payment-button" onclick="makePayment()">Pay Now</button>
+                              <!-- </form> -->
                         {% else %}
-                            <button id="buyNow" class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Buy Now</button>
+                            <button id="buyNow" class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Pay Now</button>
                         {% endif %}
                             
-                        <button type="pay" bool="" btn_id="{{ product.id}}" data="{{ product.title}}?{{ product_price}}?{{ product.id}}?{{ product.thumbnail}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md" id="buy" >Add to Cart</button>
+                        <!-- <button type="pay" bool="" btn_id="{{ product.id}}" data="{{ product.title}}?{{ product_price}}?{{ product.id}}?{{ product.thumbnail}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md" id="buy" >Add to Cart</button> -->
                     {% else%}
                         {% if user_purchased.user_id == current_user.id and user_purchased.product_id == product.id %}
                         <a href="{{product.download_link}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md hover:bg-white hover:text-yellow-500 border-2 border-yellow-500">Download</a>
@@ -57,17 +54,14 @@
                                 {% endif %}
                             {% else %}
                             {% if current_user.is_authenticated %}
-                                <div class="inline-block"><form id="buyNow" action="/paystack" method="post"><input type="hidden" name="data" id="formdata"><button class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Buy Now</button></form></div>
-                                <form>
-                                    <div>
-                                      Your order is ₦{{product_price}}
-                                    </div>
-                                    <button type="button" id="start-payment-button" onclick="makePayment()">Pay Now</button>
-                                  </form>
+                                <!-- <div class="inline-block"><form id="buyNow" action="/paystack" method="post"><input type="hidden" name="data" id="formdata"><button class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Buy Now</button></form></div> -->
+                                <!-- <form> -->
+                                    <!-- </form> -->
+                                    <button class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow" type="button" id="start-payment-button" onclick="makePayment()">Pay Now</button>
                             {% else %}
-                                <button id="buyNow" class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Buy Now</button>
+                                <button id="buyNow" class="text-white bg-yellow-500 px-2 py-1 rounded-md shadow">Pay Now</button>
                             {% endif %}
-                                <button type="pay" bool="" btn_id="{{ product.id}}" data="{{ product.title}}?{{ product_price}}?{{ product.id}}?{{ product.thumbnail}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md" id="buy" >buy</button>
+                                <!-- <button type="pay" bool="" btn_id="{{ product.id}}" data="{{ product.title}}?{{ product_price}}?{{ product.id}}?{{ product.thumbnail}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md" id="buy" >buy</button> -->
                                 {% if product.demo_link %}
                                     <a href="{{product.demo_link}}" class="buy text-white bg-yellow-500 px-2 py-1 rounded-md">Demo</a>
                                 {% endif %}
@@ -81,15 +75,23 @@
                                 <a href="../edit-item/{{ product.id }}">Edit product</a>
                             {% endif %}
                         {% endif %}
-                
-                {% if current_user.is_authenticated and product.accept_affliate %}
-                    <br>
-                    <br>
-                    <br>
-                    <p class="text-lg"><u><b>Affliate System</b></u></p>
-                    <p> Your link referral link for this product is <span class="text-lg"><b>www.helpbotics.com{{ url_for(request.endpoint, pk=product.id, ref=current_user.id) }}.</b></span></p>
-                    <p>you will make a whooping {{ product.affliate_commission }}% commission on every successful sales you bring in which amounts to N{% if product_price %} {{ product_price * (product.affliate_commission / 100) }} {% endif %} for each sales.</p>
-                    <br>
+                {% if current_user.currency %}
+                    {% if current_user.is_authenticated and product.accept_affliate %}
+                        <br>
+                        <br>
+                        <br>
+                        <p class="text-lg"><u><b>Affliate System</b></u></p>
+                        <p> Your link referral link for this product is <span class="text-lg"><b>www.helpbotics.com{{ url_for(request.endpoint, pk=product.id, ref=current_user.id) }}.</b></span></p>
+                        <p>you will make a whooping {{ product.affliate_commission }}% commission on every successful sales you bring in which amounts to {% if product_price %} {{ product_price * (product.affliate_commission / 100) }} <b>{{ currency_spent }}</b> {% endif %} for each sales.</p>
+                        <br>
+                    {% endif %}
+                {% else %}
+                    <p><b><i><a href="{{url_for('user_settings')}}">click to Update your financial details to join the affliate program</a></i></b></p>
+                    <p><b><i><a href="{{url_for('affliate_market')}}">click to see products up for affliate marketing</a></i></b></p>
+                {% endif %}
+
+                {% if product.whatsapp_support %}
+                    <p>Chat us on whatsapp via this link https://wa.me/{{product.whatsapp_support}}</p>
                 {% endif %}
             </div>
             </div>
@@ -110,11 +112,10 @@
                 <p class="font-bold sm:text-lg md:text-xl p-1 md:p-2">{{_product.title}}</p>
                 <p class="md:mt-2 sm:mt-1 p-2">
                 {% if _product.price %}
-                    <p> ₦{{ _product.price }} - <span class="text-red-600 line-through">₦{{_product.old_price}}</span> <span class="rounded-lg shadow px-2 py-1 bg-red-500 text-red-100"><span class="price-off ">{{100 - ((_product.price / _product.old_price) * 100)}}</span>% off! </span></p>
+                <p class="market_prices" amount="{{ _product.price }}?{{ _product.old_price }}?{{ _product.currency }}"> ₦{{ _product.price }} - <span class="text-red-600 line-through">₦{{_product.old_price}}</span> <span class="rounded-lg shadow px-2 py-1 bg-red-500 text-red-100"><span class="price-off ">{{100 - ((_product.price / _product.old_price) * 100)}}</span>% off! </span></p>
                 {% else %}
                     <span class="rounded-lg shadow px-2 py-1 bg-green-500 text-green-100">Free</span>
                 {% endif %}
-                    <!-- <span>{{_product.price}} </span>   -->
                 </p>    
             </div>
         {% endfor %}
@@ -123,6 +124,8 @@
             <div class="elfsight-app-71cd6ef2-6f2b-494a-b49f-3793041a32d2"></div>
         </div>
 <script>
+    const FOREX = JSON.parse("{{currency_rate}}".replaceAll("&#39;", '"'))
+    
     let priceCut = $('#price-off').text()
     priceCut = parseInt(priceCut).toFixed(0)
     $('#price-off').text(priceCut)
@@ -155,7 +158,7 @@
                 thumbnail = info[3];
                 
                 let referral = "{{referral}}"
-                let data = {'id': _id, "type": type, "price": price, "title": title, "thumbnail": thumbnail}
+                let data = {'id': _id, "type": type, "price": price, "title": title, "thumbnail": thumbnail, "currency": "{{currency_spent}}"}
                 if (referral != "None") data.referral = referral
                 console.log(data)
                 get_cart.push(data)
@@ -229,6 +232,30 @@
     }
 
 
+    const currency_rate = (BASE_CUR, TO_CUR) => {
+        let to_rate = FOREX[TO_CUR]
+        let base_rate = FOREX[BASE_CUR]
+        euro = 1 / base_rate
+        amount = euro * to_rate
+        return amount
+    }
+
+    $(".market_prices").each(function(index, elem){
+        let attr = $(elem).attr("amount").split("?");
+        let currency = attr[2]
+        let currency_spent = "{{ currency_spent }}" 
+        console.log(attr, currency, currency_spent)
+        let rate = currency_rate(currency, currency_spent );
+        let new_price = (parseFloat(attr[0]) * rate).toFixed(2);
+        let old_price = (parseFloat(attr[1] ) * rate).toFixed(2);
+        let perc = 100 - ((new_price / old_price) * 100).toFixed(2)
+
+        $(elem).html(`
+        ${new_price} <b>{{ currency_spent }}</b> - <span class="text-red-600 line-through">${old_price} <b>{{ currency_spent }}</b></span> <span class="rounded-lg shadow px-2 py-1 bg-red-500 text-red-100"><span class="price-off ">${perc}</span>% off! </span>
+        `)
+
+    })
+
 
     // $(".buy").each(function(index){
     //     $(this).click(function(){
@@ -296,8 +323,12 @@
     // }
 
     $("#buyNow").click(function(){
-        window.location.href = "/signup?next=/product/{{ product.id }}"    
-        // promptPopup("Enter your e-mail to proceed")
+        let referral = "{{referral}}"
+        if(referral && referral != "None" ){
+            window.location.href = `/signup?next=/product/{{ product.id }}?ref=${referral}`    
+        } else {
+            window.location.href = `/signup?next=/product/{{ product.id }}`
+        }
     })
 
     let promptPopup = (subject) => {
@@ -408,7 +439,8 @@
         thumbnail = info[3];
         
         let referral = "{{referral}}"
-        let data = {'id': _id, "type": type, "price": price, "title": title, "thumbnail": thumbnail}
+        let seller_id = "{{product.store.user.id}}"
+        let data = {'id': _id, "seller_id": seller_id, "type": type, "price": price, "title": title, "thumbnail": thumbnail, "currency": "{{currency_spent}}"}
         if(referral != "None") data.referral = referral
         get_cart.push(data)
 
@@ -421,18 +453,29 @@
 </script>
 <script src="https://checkout.flutterwave.com/v3.js"></script>
 <script>
-  function makePayment() {
+  async function makePayment() {
+    url = "{{ url_for('initiate_transaction')}}"
+    insertObjectToCart()
+    let data = localStorage.getItem("cart");
+    var formData = new FormData()
+    formData.append("data", data)    
+                
+    const request = await fetch(url, {
+        method: 'POST',
+        body: formData
+    });
+
+    const response = await request.json();
+    let ref = response.ref
+    console.log(response.ref)
+
     FlutterwaveCheckout({
       public_key: "FLWPUBK-462136dd2325f9137f9fba2c95b505ae-X",
-      tx_ref: "titanic-48981487343MDI0NzMx",
+      tx_ref: ref,
       amount: Number("{{product_price}}"),
       currency: "{{ currency_spent }}",
       payment_options: "card, banktransfer, ussd",
-      redirect_url: "https://glaciers.titanic.com/handle-flutterwave-payment",
-    //   meta: {
-    //     consumer_id: 23,
-    //     consumer_mac: "92a3-912ba-1192a",
-    //   },
+      redirect_url: "{{url_for('payment_success_page')}}",
       customer: {
         email: "{{current_user.email}}",
         phone_number: "{{current_user.phone}}",

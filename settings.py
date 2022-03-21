@@ -3,9 +3,9 @@ import geoip2.database, csv
 from os import getenv, path
 
 ENV = getenv("env")
-ACCEPTED_CURRENCIES = ["GBP", "CAD", "CVE", "CLP",  "COP", "CDF", "EGP", "EUR", "GMD", "GHS", "GNF", "KES", "LRD", "MWK", "MAD", "MZN", "NGN", "SOL", "RWF", "SLL", "STD", "ZAR", "TZS", "UGX", "USD", "XAF", "XOF", "ZMK", "ZMW", "BRL", "MXN", "ARS"]
+# ACCEPTED_CURRENCIES = ["GBP", "CAD", "CVE", "CLP",  "COP", "CDF", "EGP", "EUR", "GMD", "GHS", "GNF", "KES", "LRD", "MWK", "MAD", "MZN", "NGN", "SOL", "RWF", "SLL", "STD", "ZAR", "TZS", "UGX", "USD", "XAF", "XOF", "ZMK", "ZMW", "BRL", "MXN", "ARS"]
+ACCEPTED_CURRENCIES = ['AED', 'ARS', 'AUD', 'BGN', 'BRL', 'BWP', 'CAD', 'CFA', 'CHF', 'CNY', 'COP', 'CRC', 'CZK', 'DKK', 'EGP', 'EUR', 'GBP', 'GHS', 'HKD', 'HUF', 'ILS', 'INR', 'JPY', 'KES', 'MAD', 'MOP', 'MUR', 'MWK', 'MXN', 'MYR', 'NGN', 'NOK', 'NZD', 'PEN', 'PHP', 'PLN', 'RUB', 'RWF', 'SAR', 'SEK', 'SGD', 'SLL', 'THB', 'TRY', 'TWD', 'TZS', 'UGX', 'USD', 'VEF', 'XAF', 'XOF', 'ZAR', 'ZMK', 'ZMW', 'ZWD']
 
-print(len(ACCEPTED_CURRENCIES))
 if ENV == "LIVE":
     PAYSTACK_SECRET = getenv("paystack_live")
 else:
@@ -32,9 +32,6 @@ def check_currency(ip):
     except Exception as exc:
         print(exc)
         return "USD"
-
-print(check_currency("206.71.50.230"))
-
 
     # is creates a Reader object. You should use the same object
     # ross multiple requests as creation of it is expensive.
