@@ -484,16 +484,13 @@ def services():
 
 @app.route("/marketplace", methods=["GET"])
 def marketplace():
-    print(request.headers)
-    ip_addr = request.headers.get("X-Forwarded-For", request.remote_addr)
-    print(ip_addr)
     if 'X-Forwarded-For' in request.headers:
         proxy_data = request.headers['X-Forwarded-For']
         ip_list = proxy_data.split(',')
-        print(proxy_data, ip_list)
         user_ip = ip_list[0]  # first address in list is User IP
     else:
         user_ip = request.remote_addr  # For local development
+    
     currency_spent = check_currency(user_ip)
     currency_rate = only_rates()
     products = Products.query.all()[:8]
@@ -505,16 +502,28 @@ def redirectThanks():
 
 @app.route("/market", methods=["GET"])
 def market():
-    ip_addr = request.remote_addr
-    currency_spent = check_currency(ip_addr)
+    if 'X-Forwarded-For' in request.headers:
+        proxy_data = request.headers['X-Forwarded-For']
+        ip_list = proxy_data.split(',')
+        user_ip = ip_list[0]  # first address in list is User IP
+    else:
+        user_ip = request.remote_addr  # For local development
+    
+    currency_spent = check_currency(user_ip)
     products = Products.query.order_by(Products.datetime.desc()).all()
     rates = only_rates()
     return render_template("market.html", products=products, currency_spent=currency_spent, currency_rate=rates)
 
 @app.route("/affliate-market", methods=["GET"])
 def affliate_market():
-    ip_addr = request.remote_addr
-    currency_spent = check_currency(ip_addr)
+    if 'X-Forwarded-For' in request.headers:
+        proxy_data = request.headers['X-Forwarded-For']
+        ip_list = proxy_data.split(',')
+        user_ip = ip_list[0]  # first address in list is User IP
+    else:
+        user_ip = request.remote_addr  # For local development
+
+    currency_spent = check_currency(user_ip)
     currency_rate = only_rates()
     affliate_products = Products.query.filter_by(accept_affliate=True).order_by(Products.datetime.desc()).all()
     return render_template("affliate_market.html", products=affliate_products, currency_spent=currency_spent, currency_rate=currency_rate)
@@ -553,16 +562,21 @@ def product(pk):
     product = Products.query.filter_by(id=pk).first()
     referral = request.args.get("ref")
 
-    ip_addr = request.remote_addr
     recommended_hamlet = generate_recommendation(product.title)
     search = f'({recommended_hamlet.replace(" ", ")|(")})'
     all_products = Products.query.filter(Products.id != pk, Products.title.op('regexp')(r'%s' %search)).all()[:4]
 
     product_currency = product.currency
-    currency_spent = check_currency(ip_addr)
+    if 'X-Forwarded-For' in request.headers:
+        proxy_data = request.headers['X-Forwarded-For']
+        ip_list = proxy_data.split(',')
+        user_ip = ip_list[0]  # first address in list is User IP
+    else:
+        user_ip = request.remote_addr  # For local development
+    
+    currency_spent = check_currency(user_ip)
     product_price = change_rate(product.price, product_currency, currency_spent)
     old_price = change_rate(product.old_price, product_currency, currency_spent)
-
 
     currency_rate = only_rates()
     if not all_products:

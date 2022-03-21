@@ -30,7 +30,7 @@ def check_currency(ip):
     try:
         print("IP addr", ip)
         response = reader.country(ip)
-        print("Currency", response.country.iso_code)
+        print("SEEN Currency", response.country.iso_code)
         currency_spent = CURRENCIES.get(response.country.iso_code)
         if currency_spent not in ACCEPTED_CURRENCIES:
             currency_spent = "USD"
