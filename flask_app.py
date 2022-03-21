@@ -484,8 +484,17 @@ def services():
 
 @app.route("/marketplace", methods=["GET"])
 def marketplace():
-    ip_addr = request.remote_addr
-    currency_spent = check_currency(ip_addr)
+    print(request.headers)
+    ip_addr = request.headers.get("X-Forwarded-For", request.remote_addr)
+    print(ip_addr)
+    if 'X-Forwarded-For' in request.headers:
+        proxy_data = request.headers['X-Forwarded-For']
+        ip_list = proxy_data.split(',')
+        print(proxy_data, ip_list)
+        user_ip = ip_list[0]  # first address in list is User IP
+    else:
+        user_ip = request.remote_addr  # For local development
+    currency_spent = check_currency(user_ip)
     currency_rate = only_rates()
     products = Products.query.all()[:8]
     return render_template("home.html", products=products, currency_spent=currency_spent, currency_rate=currency_rate)
