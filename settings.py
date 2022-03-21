@@ -11,7 +11,12 @@ if ENV == "LIVE":
 else:
     PAYSTACK_SECRET = getenv("paystack_test")
 
-static_path = path.abspath('./static')
+production = getenv("dev")
+
+if production == "live": 
+    static_path = path.abspath('./dataslidmarketplace/static')
+else:
+    static_path = path.abspath('./static')
 
 reader = geoip2.database.Reader(f'{static_path}/GeoLite2-Country.mmdb')
 csv_file = f'{static_path}/currency.csv'
