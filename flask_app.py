@@ -7,7 +7,7 @@ from is_safe_url import is_safe_url
 from flask_humanize import Humanize
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user, current_user
 from forms import MyForm, LoginForm, TestimonyForm 
-from models import ProductAuth, Blog, Products, UserProducts, User, EmailSubcribers, Testimonial, app, db, Transaction_Table
+from models import ProductAuth, Store, Blog, Products, UserProducts, User, EmailSubcribers, Testimonial, app, db, Transaction_Table
 from schema import user_schema
 from datetime import datetime
 from pypaystack import Transaction, errors
@@ -161,11 +161,6 @@ def confirm_payment():
             
             transaction.amount = product.price 
             transaction.transaction_complete = True
-
-            MAIL_SUBJECT = ""
-            MAIL_BODY = ""
-        
-            send_mail("", "", )
  
             # Delete failed transactions
             failed_transactions = Transaction_Table.query.filter_by(amount="")
@@ -727,7 +722,7 @@ def signup():
             is_safe_url(next_page, request.url)
             if is_safe_url(next_page, request.url):
                 return redirect(next_page)
-            return redirect("/market") 
+            return redirect("/dashboard") 
         else:
             password = md5_crypt.hash(password)
             check_for_first_user = len(User.query.all())
@@ -741,8 +736,12 @@ def signup():
             
             db.session.add(user)
             db.session.commit()
+
+            store = Store(user_id=user.id, datetime=datetime.now())       
+            db.session.add(store)
+            db.session.commit()
             
-            send_mail("Welcome to Helpbotics!", "You have successfully sign up to helpbotics, Helpbotics is a platform of many opportunities, you can buy and sell any useful digital product and get your money in real-time, We also have affliate plans to enable people to make side bucks, you can refer new people to the platform and earn close to 1 USD per referral. Check your Dashboard, complete your financial imformation, copy your referral link and start making cool cash! if you need any help with purchase, don't hesistate to contact our support at https://wa.me/2348127216323. You can also ask the community questions, check https://forum.helpbotics.com to get started. Thanks for joining us!",  email)
+            send_mail("Welcome to Helpbotics!", "You have successfully signed up to helpbotics. Helpbotics is a platform of many opportunities, you can buy and sell any useful digital product and get your money in real-time, We also have affiliate plans to enable people to make side bucks, you can refer new people to the platform and earn more than 1 USD per referral. Check your Dashboard, complete your financial imformation, copy your referral link and start making cool cash! if you need any help with purchase, don't hesistate to contact our support at https://wa.me/2348127216323. You can also ask the community questions, check https://forum.helpbotics.com to get started. Thanks for joining us!",  email)
             user = User.query.filter_by(email=email).first()
             login_user(user)
             is_safe_url(next_page, request.url)
