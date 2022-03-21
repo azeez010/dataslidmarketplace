@@ -15,9 +15,10 @@ CACHE_RATES = {}
 app = Flask(__name__)
 
 URL = os.environ.get("DATABASE_URL")
+DEV = os.environ.get("dec")
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
-if URL:
+if URL and DEV == "live":
     app.config['SQLALCHEMY_DATABASE_URI'] = URL
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://azeez:azeez007@localhost/dataslid'
