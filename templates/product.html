@@ -91,7 +91,7 @@
                 {% endif %}
 
                 {% if product.whatsapp_support %}
-                    <p>Chat us on whatsapp via this link https://wa.me/{{product.whatsapp_support}}</p>
+                    <p>Chat us on whatsapp via this link <b><a href="https://wa.me/{{product.whatsapp_support}}">https://wa.me/{{product.whatsapp_support}}</a></b></p>
                 {% endif %}
             </div>
             </div>
@@ -440,7 +440,7 @@
         
         let referral = "{{referral}}"
         let seller_id = "{{product.store.user.id}}"
-        let data = {'id': _id, "seller_id": seller_id, "type": type, "price": price, "title": title, "thumbnail": thumbnail, "currency": "{{currency_spent}}"}
+        let data = {'id': _id, "seller_id": seller_id, "buyer_id": "{{ current_user.id }}", "type": type, "price": price, "title": title, "thumbnail": thumbnail, "currency": "{{currency_spent}}"}
         if(referral != "None") data.referral = referral
         get_cart.push(data)
 
@@ -467,7 +467,7 @@
 
     const response = await request.json();
     let ref = response.ref
-    console.log(response.ref)
+    // console.log(response.ref)
 
     FlutterwaveCheckout({
       public_key: "FLWPUBK-462136dd2325f9137f9fba2c95b505ae-X",
