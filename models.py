@@ -15,7 +15,7 @@ CACHE_RATES = {}
 app = Flask(__name__)
 
 URL = os.environ.get("DATABASE_URL")
-DEV = os.environ.get("dec")
+DEV = os.environ.get("dev")
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 if URL and DEV == "live":
