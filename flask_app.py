@@ -1,5 +1,6 @@
 import boto3, os, json, re, uuid
 import git
+from rave_python import Rave
 from flask import  request, render_template, flash, redirect, url_for
 from passlib.hash import md5_crypt
 from is_safe_url import is_safe_url
@@ -15,7 +16,6 @@ from pypaystack import utils as pay_utils
 from utils import all_banks, change_rate, only_rates, get_rate, upload_image, send_mail, get_two_random_number, create_product_key, validate_email
 from helper import generate_recommendation
 from settings import PAYSTACK_SECRET, check_currency, ACCEPTED_CURRENCIES
-# from rave_python import Rave
 # For import all file basic_auth at once
 import import_all
 
@@ -95,7 +95,7 @@ def git_update():
     return '', 200
 
 
-@app.route("/confirm-payment", methods=["POST"])
+@app.route("/comfirm-payment", methods=["POST"])
 def confirm_payment():
     if request.method == "POST":
         # Later implementation for sign up bonus
@@ -109,6 +109,7 @@ def confirm_payment():
         bought_amount = charge_main_data.get("amount")
         currency = charge_main_data.get("currency")
         buyer_email = charge_main_data.get("customer").get("email")
+        buyer = User.query.filter_by(email=buyer_email).first()
 
         print(ip_addr, currency, buyer_email)
         if event == "charge.completed" and ip_addr == "197.210.64.96":
@@ -120,16 +121,12 @@ def confirm_payment():
             
             product_id = load_data.get("id")
             seller_id = load_data.get("seller_id")
-            buyer_id = load_data.get("buyer_id")
-            
-            seller = User.query.filter_by(id=seller_id).first()
-            buyer = User.query.filter_by(id=buyer_id).first()
-            product = Products.query.filter_by(id=product_id).first()
+            seller = User.query.filter_by(id=seller_id)
+            product = Products.query.filter_by(id=product_id)
             referral = load_data.get("referral")
             
-            
             if referral:
-                user_referral = User.query.filter_by(id=referral).first()
+                user_referral = User.query.filter_by(id=referral)
                 affliate_commission = (product.affliate_commission / 100) * amount
                 # Remove Commision from the main money
                 amount -= affliate_commission 
@@ -149,7 +146,7 @@ def confirm_payment():
 
             amount = change_rate(product.price, product.currency, seller.currency)
             
-            user_product = UserProducts(user_id=buyer_id, product_id=product_id)
+            user_product = UserProducts(user_id=buyer.id, product_id=product_id)
             db.session.add(user_product)
                 
             # The remaining balance
@@ -158,16 +155,16 @@ def confirm_payment():
                 create_product_key(product.id)
             
             # Email to Seller 
-            send_mail("Money made! Congrats", f"You just made {amount} {seller.currency} because your product - {product.title} you posted on our platform was sold successfully, Congratulations, Go to your dashboard for more details", seller.email)
+            send_mail("Cheddar made! Congrats", f"You just made {amount} {seller.currency} because your product - {product.title} you posted on our platform was sold successfully, Congratulations, Go to your dashboard for more details", seller.email)
             # Email to the Buyer
             send_mail("Sweet, smooth purchase, hope you would love it!", f"You just bought {product.title} for {bought_amount} {currency} on our platform. We hope you enjoy it and come back to buy other live change products, If you love the product, you can make extra money by promoting and sharing your link to your loved ones.  Congrats, you can check you purchase in the download section, reach out to the creator or helpbotics support by clicking on the supports links or whatsapp tab on the application. You can also create threads to ask questions on our official forum, forum.helpbotics.com. Thanks ", buyer.email)
             
             transaction.amount = product.price 
             transaction.transaction_complete = True
 
-            # # Delete failed transactions
-            # failed_transactions = Transaction_Table.query.filter_by(amount="").first()
-            # db.session.delete(failed_transactions)
+            # Delete failed transactions
+            failed_transactions = Transaction_Table.query.filter_by(amount="")
+            db.session.delete(failed_transactions)
             db.session.commit()
             
 @app.route("/callback", methods=["POST", "GET"])
