@@ -77,22 +77,28 @@
                         {% endif %}
                 {% if current_user.currency %}
                     {% if current_user.is_authenticated and product.accept_affliate %}
-                        <br>
+                    <div>
                         <br>
                         <br>
                         <p class="text-lg"><u><b>Affliate System</b></u></p>
                         <p> Your link referral link for this product is <span class="text-lg"><b>www.helpbotics.com{{ url_for(request.endpoint, pk=product.id, ref=current_user.id) }}.</b></span></p>
                         <p>you will make a whooping {{ product.affliate_commission }}% commission on every successful sales you bring in which amounts to {% if product_price %} {{ product_price * (product.affliate_commission / 100) }} <b>{{ currency_spent }}</b> {% endif %} for each sales.</p>
                         <br>
+                    </div>
+
                     {% endif %}
                 {% else %}
+                <div class="mt-3 mb-4">
                     <p><b><i><a href="{{url_for('user_settings')}}">click to Update your financial details to join the affliate program</a></i></b></p>
                     <p><b><i><a href="{{url_for('affliate_market')}}">click to see products up for affliate marketing</a></i></b></p>
+                </div>
                 {% endif %}
-
+                <br>
                 {% if product.whatsapp_support %}
-                    <p>Chat us on whatsapp via this link <b><a href="https://wa.me/{{product.whatsapp_support}}">https://wa.me/{{product.whatsapp_support}}</a></b></p>
+                    <p class="mb-4">Chat us on whatsapp via this link <b><a href="https://wa.me/{{product.whatsapp_support}}">https://wa.me/{{product.whatsapp_support}}</a></b></p>
                 {% endif %}
+                <br>
+                <br>
             </div>
             </div>
         </div>
